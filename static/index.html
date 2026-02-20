@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LetLet AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --c1:#00ffe7;
+  --c2:#0066ff;
+  --bg:#03080f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
+
+/* ── PARTICLES BG ─────────────────────────────────── */
+#bgCanvas{position:fixed;inset:0;z-index:0}
+
+/* ── CRT overlay ──────────────────────────────────── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.13) 0px,rgba(0,0,0,0.13) 1px,
+    transparent 1px,transparent 3px
+  );
+}
+
+/* ── MAIN LAYOUT ──────────────────────────────────── */
+.scene{
+  position:relative;z-index:1;
+  width:100vw;height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+
+/* ── TOP STATUS BAR ───────────────────────────────── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 28px;
+  background:linear-gradient(180deg,rgba(3,8,15,0.95),transparent);
+  z-index:100;
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(10px,1.1vw,12px);
+  letter-spacing:.2em;
+  color:rgba(0,255,231,0.5);
+}
+.topbar .logo{
+  font-family:'Orbitron',sans-serif;
+  font-weight:700;
+  font-size:clamp(13px,1.5vw,18px);
+  color:var(--c1);
+  letter-spacing:.3em;
+  text-shadow:0 0 20px var(--c1);
+}
+.topbar .dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--c1);
+  box-shadow:0 0 8px var(--c1);
+  display:inline-block;margin-right:8px;
+  animation:dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── FACE CANVAS ──────────────────────────────────── */
+#faceCanvas{
+  display:block;
+  width:min(92vw,900px);
+  height:min(58vw,580px);
+  position:relative;z-index:2;
+  filter:drop-shadow(0 0 40px rgba(0,255,231,0.08));
+}
+
+/* ── EMOTION LABEL ────────────────────────────────── */
+#emoLabel{
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(10px,1vw,12px);
+  letter-spacing:.35em;
+  color:rgba(0,255,231,0.35);
+  text-transform:uppercase;
+  margin-top:6px;
+  height:16px;
+  transition:color .5s;
+}
+
+/* ── CHAT PANEL ───────────────────────────────────── */
+.chat{
+  position:fixed;bottom:0;left:0;right:0;
+  z-index:100;
+  padding:0 clamp(16px,5vw,80px) 22px;
+  background:linear-gradient(0deg,rgba(3,8,15,0.97) 60%,transparent);
+}
+
+/* log */
+.log{
+  max-width:860px;margin:0 auto 10px;
+  height:clamp(60px,12vh,110px);
+  overflow-y:auto;
+  padding:8px 0;
+  scrollbar-width:none;
+}
+.log::-webkit-scrollbar{display:none}
+.entry{
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(11px,1.3vw,14px);
+  line-height:1.85;
+  padding:0 4px;
+}
+.you   {color:var(--c1)}
+.bot   {color:rgba(180,255,248,0.85)}
+.think {color:rgba(0,255,231,0.3);font-style:italic}
+.err   {color:#ff4466}
+
+/* input row */
+.input-row{
+  max-width:860px;margin:0 auto;
+  display:flex;align-items:center;gap:12px;
+  border:1px solid rgba(0,255,231,0.18);
+  border-radius:6px;
+  padding:4px 4px 4px 16px;
+  background:rgba(0,255,231,0.03);
+  backdrop-filter:blur(6px);
+  transition:border-color .3s,box-shadow .3s;
+}
+.input-row:focus-within{
+  border-color:rgba(0,255,231,0.55);
+  box-shadow:0 0 24px rgba(0,255,231,0.08);
+}
+.pfx{font-family:'Share Tech Mono',monospace;font-size:15px;color:rgba(0,255,231,0.4);white-space:nowrap}
+.input-row input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--c1);font-family:'Share Tech Mono',monospace;
+  font-size:clamp(13px,1.4vw,15px);
+  caret-color:var(--c1);
+}
+.input-row input::placeholder{color:rgba(0,255,231,0.2)}
+.send-btn{
+  padding:10px 22px;
+  background:linear-gradient(135deg,rgba(0,255,231,0.12),rgba(0,102,255,0.12));
+  border:1px solid rgba(0,255,231,0.4);
+  border-radius:4px;
+  color:var(--c1);
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.15em;
+  cursor:pointer;
+  transition:background .25s,box-shadow .25s;
+  white-space:nowrap;
+}
+.send-btn:hover{background:rgba(0,255,231,0.18);box-shadow:0 0 18px rgba(0,255,231,0.2)}
+.send-btn:disabled{opacity:.25;cursor:not-allowed}
+
+.statusbar{
+  max-width:860px;margin:6px auto 0;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;letter-spacing:.18em;
+  color:rgba(0,255,231,0.25);
+  text-align:right;
+}
+</style>
+</head>
+<body>
+
+<!-- particles -->
+<canvas id="bgCanvas"></canvas>
+
+<div class="topbar">
+  <span class="logo">LETLET</span>
+  <span><span class="dot"></span>SYSTEM ONLINE</span>
+  <span id="clock">--:--:--</span>
+</div>
+
+<div class="scene">
+  <canvas id="faceCanvas"></canvas>
+  <div id="emoLabel">◈ NEUTRAL ◈</div>
+</div>
+
+<div class="chat">
+  <div class="log" id="log">
+    <div class="entry bot">&gt; BOOT COMPLETE — LetLet AI v3.1 READY</div>
+    <div class="entry bot">&gt; Say hello or ask me anything...</div>
+  </div>
+  <div class="input-row">
+    <span class="pfx">&gt;_</span>
+    <input id="prompt" type="text" placeholder="Ask me anything..." autocomplete="off"/>
+    <button class="send-btn" id="send-btn">TRANSMIT</button>
+  </div>
+  <div class="statusbar" id="status">[ IDLE ]</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  CLOCK
+// ════════════════════════════════════════════════
+function tickClock(){
+  const n=new Date()
+  document.getElementById('clock').textContent=
+    n.toLocaleTimeString('en-GB',{hour12:false})
+}
+tickClock(); setInterval(tickClock,1000)
+
+// ════════════════════════════════════════════════
+//  PARTICLE BACKGROUND
+// ════════════════════════════════════════════════
+const bg   = document.getElementById('bgCanvas')
+const bctx = bg.getContext('2d')
+let BW, BH
+function resizeBg(){BW=bg.width=window.innerWidth; BH=bg.height=window.innerHeight}
+resizeBg(); window.addEventListener('resize',resizeBg)
+
+const PARTS = Array.from({length:90},()=>({
+  x:Math.random()*1920,y:Math.random()*1080,
+  vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+  r:Math.random()*1.4+.3,
+  a:Math.random()
+}))
+function drawBg(){
+  bctx.clearRect(0,0,BW,BH)
+  PARTS.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy
+    if(p.x<0)p.x=BW; if(p.x>BW)p.x=0
+    if(p.y<0)p.y=BH; if(p.y>BH)p.y=0
+    bctx.beginPath()
+    bctx.arc(p.x,p.y,p.r,0,Math.PI*2)
+    bctx.fillStyle=`rgba(0,255,231,${p.a*0.18})`
+    bctx.fill()
+  })
+  // faint connection lines
+  for(let i=0;i<PARTS.length;i++){
+    for(let j=i+1;j<PARTS.length;j++){
+      const dx=PARTS[i].x-PARTS[j].x, dy=PARTS[i].y-PARTS[j].y
+      const d=Math.sqrt(dx*dx+dy*dy)
+      if(d<110){
+        bctx.beginPath()
+        bctx.moveTo(PARTS[i].x,PARTS[i].y)
+        bctx.lineTo(PARTS[j].x,PARTS[j].y)
+        bctx.strokeStyle=`rgba(0,255,231,${(1-d/110)*0.045})`
+        bctx.lineWidth=.6
+        bctx.stroke()
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+//  FACE ENGINE
+// ════════════════════════════════════════════════
+const fc   = document.getElementById('faceCanvas')
+const fctx = fc.getContext('2d')
+let FW, FH
+function resizeFace(){
+  const r=fc.getBoundingClientRect()
+  FW=fc.width=r.width; FH=fc.height=r.height
+}
+resizeFace(); window.addEventListener('resize',resizeFace)
+
+// ── Emotion definitions ──────────────────────────
+const EMO={
+  neutral  :{rgb:[0,255,231], glow:[0,255,231], mouth:0,    brow:0,    lid:0,    ps:1.0,  label:'NEUTRAL'},
+  happy    :{rgb:[255,220,0], glow:[255,180,0], mouth:.6,   brow:-.22, lid:.12,  ps:1.18, label:'HAPPY'},
+  sad      :{rgb:[60,130,255],glow:[30,100,255],mouth:-.5,  brow:.32,  lid:.45,  ps:.82,  label:'SAD'},
+  angry    :{rgb:[255,40,40], glow:[200,0,0],   mouth:-.32, brow:.5,   lid:.38,  ps:1.25, label:'ANGRY'},
+  surprised:{rgb:[255,140,0], glow:[255,100,0], mouth:.05,  brow:-.45, lid:-.12, ps:1.6,  label:'SURPRISED'},
+  thinking :{rgb:[160,80,255],glow:[120,40,255],mouth:.12,  brow:.12,  lid:.15,  ps:.88,  label:'THINKING'},
+  love     :{rgb:[255,80,180],glow:[255,40,140],mouth:.65,  brow:-.25, lid:.2,   ps:1.1,  label:'LOVE ♥'},
+}
+
+// lerp state
+const cur={rgb:[0,255,231],glow:[0,255,231],mouth:0,brow:0,lid:0,ps:1}
+const tgt={rgb:[0,255,231],glow:[0,255,231],mouth:0,brow:0,lid:0,ps:1}
+let curEmoName='neutral'
+
+function setEmotion(name,dur=0){
+  if(!EMO[name])name='neutral'
+  curEmoName=name
+  const e=EMO[name]
+  tgt.rgb=[...e.rgb]; tgt.glow=[...e.glow]
+  tgt.mouth=e.mouth; tgt.brow=e.brow; tgt.lid=e.lid; tgt.ps=e.ps
+  document.getElementById('emoLabel').textContent='◈ '+e.label+' ◈'
+  document.getElementById('emoLabel').style.color=`rgba(${e.rgb[0]},${e.rgb[1]},${e.rgb[2]},0.5)`
+  if(dur>0)setTimeout(()=>setEmotion('neutral'),dur)
+}
+setEmotion('neutral')
+
+function lN(a,b,t){return a+(b-a)*t}
+function lA(a,b,t){return a.map((v,i)=>lN(v,b[i],t))}
+function rgba(rgb,a){return `rgba(${rgb[0]|0},${rgb[1]|0},${rgb[2]|0},${a})`}
+
+// mouse
+let mx=window.innerWidth/2, my=window.innerHeight/2
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY})
+// Reset to center if mouse leaves the window
+document.addEventListener('mouseleave',()=>{mx=window.innerWidth/2;my=window.innerHeight/2})
+
+// blink
+let blinkNext=2000+Math.random()*2500, blinkT=0, blinkDur=0
+// talk
+let talkT=0, talking=false
+
+// ── Draw one eye (fully redrawn each frame) ──────
+function eye(cx,cy,ew,eh,lid,px,py,ps,rgb,glow,brow,side){
+  // outer glow ring
+  const og=fctx.createRadialGradient(cx,cy,ew*.3,cx,cy,ew*1.6)
+  og.addColorStop(0,rgba(glow,.18))
+  og.addColorStop(1,rgba(glow,0))
+  fctx.beginPath(); fctx.ellipse(cx,cy,ew*1.6,eh*1.6,0,0,Math.PI*2)
+  fctx.fillStyle=og; fctx.fill()
+
+  // socket
+  fctx.beginPath(); fctx.ellipse(cx,cy,ew,eh,0,0,Math.PI*2)
+  fctx.fillStyle='#020a12'
+  fctx.fill()
+  fctx.strokeStyle=rgba(rgb,.85); fctx.lineWidth=2.5; fctx.stroke()
+
+  // clip
+  fctx.save()
+  fctx.beginPath(); fctx.ellipse(cx,cy,ew-1,eh-1,0,0,Math.PI*2); fctx.clip()
+
+  // scan sweep
+  const now=performance.now()
+  const scanY=cy-eh+((now%2200)/2200)*eh*2
+  const sg=fctx.createLinearGradient(0,scanY-eh*.3,0,scanY+eh*.3)
+  sg.addColorStop(0,rgba(rgb,0))
+  sg.addColorStop(.5,rgba(rgb,.1))
+  sg.addColorStop(1,rgba(rgb,0))
+  fctx.fillStyle=sg
+  fctx.fillRect(cx-ew,scanY-eh*.3,ew*2,eh*.6)
+
+  // grid
+  fctx.strokeStyle=rgba(rgb,.055); fctx.lineWidth=.8
+  for(let gx=cx-ew;gx<cx+ew;gx+=13){
+    fctx.beginPath();fctx.moveTo(gx,cy-eh);fctx.lineTo(gx,cy+eh);fctx.stroke()
+  }
+  for(let gy=cy-eh;gy<cy+eh;gy+=13){
+    fctx.beginPath();fctx.moveTo(cx-ew,gy);fctx.lineTo(cx+ew,gy);fctx.stroke()
+  }
+
+  // iris gradient
+  const ir=eh*.56*ps
+  const ig=fctx.createRadialGradient(cx+px*.4,cy+py*.4-ir*.15,ir*.06,cx+px*.4,cy+py*.4,ir)
+  ig.addColorStop(0,rgba(rgb,.95))
+  ig.addColorStop(.4,rgba(rgb,.4))
+  ig.addColorStop(1,rgba(rgb,.04))
+  fctx.beginPath(); fctx.arc(cx+px,cy+py,ir,0,Math.PI*2)
+  fctx.fillStyle=ig; fctx.fill()
+  fctx.strokeStyle=rgba(rgb,.6); fctx.lineWidth=1.5; fctx.stroke()
+
+  // inner iris ring
+  fctx.beginPath(); fctx.arc(cx+px,cy+py,ir*.65,0,Math.PI*2)
+  fctx.strokeStyle=rgba(rgb,.2); fctx.lineWidth=1; fctx.stroke()
+
+  // pupil
+  const pr=ir*.36
+  fctx.beginPath(); fctx.arc(cx+px,cy+py,pr,0,Math.PI*2)
+  fctx.fillStyle='#000'; fctx.fill()
+
+  // pupil core glow
+  const pg=fctx.createRadialGradient(cx+px,cy+py,0,cx+px,cy+py,pr*.8)
+  pg.addColorStop(0,rgba(rgb,1)); pg.addColorStop(1,rgba(rgb,0))
+  fctx.beginPath(); fctx.arc(cx+px,cy+py,pr*.8,0,Math.PI*2)
+  fctx.fillStyle=pg; fctx.fill()
+
+  // shine
+  fctx.beginPath()
+  fctx.arc(cx+px-pr*.38,cy+py-pr*.45,pr*.26,0,Math.PI*2)
+  fctx.fillStyle='rgba(255,255,255,.6)'; fctx.fill()
+  fctx.beginPath()
+  fctx.arc(cx+px+pr*.28,cy+py-pr*.3,pr*.12,0,Math.PI*2)
+  fctx.fillStyle='rgba(255,255,255,.3)'; fctx.fill()
+
+  fctx.restore() // end clip
+
+  // eyelid
+  const effLid=Math.max(0,lid)
+  if(effLid>0.01){
+    fctx.save()
+    fctx.beginPath()
+    fctx.ellipse(cx,cy-eh*(1-effLid*.5),ew+2,eh*(effLid+.06),0,0,Math.PI*2)
+    fctx.fillStyle='#020a12'; fctx.fill()
+    fctx.restore()
+  }
+
+  // bottom shadow
+  const bg2=fctx.createLinearGradient(0,cy,0,cy+eh)
+  bg2.addColorStop(0,rgba(rgb,.1)); bg2.addColorStop(1,rgba(rgb,0))
+  fctx.beginPath(); fctx.ellipse(cx,cy,ew,eh,0,0,Math.PI)
+  fctx.fillStyle=bg2; fctx.fill()
+
+  // corner brackets
+  const bx=ew+10,by=eh+8,bs=14
+  fctx.strokeStyle=rgba(rgb,.45); fctx.lineWidth=2; fctx.lineCap='square'
+  ;[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy])=>{
+    fctx.beginPath()
+    fctx.moveTo(cx+sx*(bx-bs),cy+sy*by)
+    fctx.lineTo(cx+sx*bx,cy+sy*by)
+    fctx.lineTo(cx+sx*bx,cy+sy*(by-bs))
+    fctx.stroke()
+  })
+
+  // eyebrow
+  const bwHalf=ew*.85
+  const bBase=cy-eh-18
+  const ang=brow*(side==='L'?1:-1)
+  fctx.save(); fctx.translate(cx,bBase)
+  fctx.beginPath()
+  fctx.moveTo(-bwHalf, ang*20)
+  fctx.lineTo( bwHalf,-ang*20)
+  fctx.strokeStyle=rgba(rgb,.8); fctx.lineWidth=4.5; fctx.lineCap='round'; fctx.stroke()
+  // brow glow
+  fctx.strokeStyle=rgba(glow,.15); fctx.lineWidth=10; fctx.stroke()
+  fctx.restore()
+}
+
+// ── Draw mouth ────────────────────────────────────
+function mouth(cx,cy,mw,curve,tph){
+  const mh=Math.abs(curve)*mw*.42
+  const openAmt=tph>0?Math.abs(Math.sin(tph))*10:0
+
+  fctx.save()
+  fctx.lineCap='round'
+  fctx.lineWidth=3.5
+  fctx.shadowColor=rgba(cur.glow,.7); fctx.shadowBlur=14
+
+  if(Math.abs(curve)<.05){
+    // flat with talking
+    if(openAmt>1){
+      fctx.beginPath()
+      fctx.ellipse(cx,cy,mw/2,openAmt*.6,0,0,Math.PI*2)
+      fctx.fillStyle='rgba(0,0,0,.8)'; fctx.fill()
+      fctx.strokeStyle=rgba(cur.rgb,.85); fctx.stroke()
+    } else {
+      fctx.beginPath(); fctx.moveTo(cx-mw/2,cy); fctx.lineTo(cx+mw/2,cy)
+      fctx.strokeStyle=rgba(cur.rgb,.85); fctx.stroke()
+    }
+  } else if(curve>0){
+    // smile
+    fctx.beginPath()
+    fctx.moveTo(cx-mw/2,cy)
+    fctx.quadraticCurveTo(cx,cy+mh+openAmt,cx+mw/2,cy)
+    fctx.strokeStyle=rgba(cur.rgb,.9); fctx.stroke()
+    // teeth hint on big smile
+    if(curve>.45){
+      fctx.beginPath()
+      fctx.moveTo(cx-mw/2+8,cy+4)
+      fctx.quadraticCurveTo(cx,cy+mh*.65,cx+mw/2-8,cy+4)
+      fctx.fillStyle='rgba(255,255,255,0.7)'; fctx.fill()
+    }
+  } else {
+    // frown
+    fctx.beginPath()
+    fctx.moveTo(cx-mw/2,cy)
+    fctx.quadraticCurveTo(cx,cy-mh-openAmt,cx+mw/2,cy)
+    fctx.strokeStyle=rgba(cur.rgb,.9); fctx.stroke()
+  }
+  fctx.restore()
+}
+
+// ── MAIN LOOP ─────────────────────────────────────
+let lastT=0
+function loop(ts){
+  requestAnimationFrame(loop)
+  const dt=Math.min((ts-lastT)/1000,.05); lastT=ts
+
+  // lerp
+  const sp=dt*5
+  cur.rgb  =lA(cur.rgb,  tgt.rgb,  sp*2.8)
+  cur.glow =lA(cur.glow, tgt.glow, sp*2.8)
+  cur.mouth=lN(cur.mouth,tgt.mouth,sp*2.2)
+  cur.brow =lN(cur.brow, tgt.brow, sp*3)
+  cur.lid  =lN(cur.lid,  tgt.lid,  sp*3)
+  cur.ps   =lN(cur.ps,   tgt.ps,   sp*3)
+
+  // blink
+  blinkNext-=dt*1000
+  let blid=0
+  if(blinkNext<=0){blinkT=0;blinkDur=140;blinkNext=2400+Math.random()*2800}
+  if(blinkDur>0){blinkT+=dt*1000;blid=Math.sin((blinkT/blinkDur)*Math.PI);if(blinkT>=blinkDur)blinkDur=0}
+
+  // talk
+  if(talking) talkT+=dt*12
+  else talkT*=.85
+
+  // bg
+  drawBg()
+
+  // face clear
+  fctx.clearRect(0,0,FW,FH)
+
+  // layout
+  const ew=FW*.155, eh=FH*.28
+  const ey=FH*.4
+  const gap=FW*.3
+  const lx=FW/2-gap/2, rx=FW/2+gap/2
+
+  // pupil offset — only move when mouse is very close to the face, stay forward otherwise
+  function pOff(ecx,ecy){
+    const rect=fc.getBoundingClientRect()
+    const dx=mx-(rect.left+ecx), dy=my-(rect.top+ecy)
+    const d=Math.sqrt(dx*dx+dy*dy)||1
+    const influenceRadius = ew * 2.5   // only react within this distance
+    const maxShift = ew * 0.10         // tiny nudge — pupils stay mostly centered
+    if(d > influenceRadius) return [0, 0]
+    const strength = 1 - (d / influenceRadius)  // fades out as mouse moves away
+    const f = (Math.min(maxShift, d) / d) * strength
+    return [dx*f, dy*f]
+  }
+  const [lox,loy]=pOff(lx,ey)
+  const [rox,roy]=pOff(rx,ey)
+  const lid=Math.max(cur.lid,blid)
+
+  eye(lx,ey,ew,eh,lid,lox,loy,cur.ps,cur.rgb,cur.glow,cur.brow,'L')
+  eye(rx,ey,ew,eh,lid,rox,roy,cur.ps,cur.rgb,cur.glow,cur.brow,'R')
+
+  // nose
+  fctx.fillStyle=rgba(cur.rgb,.28)
+  fctx.beginPath();fctx.arc(FW/2-9,ey+eh*.85,2.8,0,Math.PI*2);fctx.fill()
+  fctx.beginPath();fctx.arc(FW/2+9,ey+eh*.85,2.8,0,Math.PI*2);fctx.fill()
+
+  // mouth
+  mouth(FW/2, ey+eh*1.55, ew*1.75, cur.mouth, talkT)
+
+  // heart pupils on love
+  if(curEmoName==='love'){
+    fctx.save()
+    fctx.globalAlpha=.55
+    ;[[lx,ey],[rx,ey]].forEach(([hx,hy])=>{
+      const s=ew*.18
+      fctx.fillStyle=rgba(cur.rgb,1)
+      fctx.font=`${s*2.2}px serif`
+      fctx.textAlign='center'; fctx.textBaseline='middle'
+      fctx.fillText('♥',hx,hy)
+    })
+    fctx.restore()
+  }
+
+  // face border glow
+  fctx.strokeStyle=rgba(cur.glow,.07); fctx.lineWidth=1.5
+  fctx.beginPath()
+  fctx.roundRect(FW*.03,FH*.04,FW*.94,FH*.92,20)
+  fctx.stroke()
+}
+requestAnimationFrame(loop)
+
+// ════════════════════════════════════════════════
+//  CHAT
+// ════════════════════════════════════════════════
+const logEl   =document.getElementById('log')
+const inputEl =document.getElementById('prompt')
+const sendBtnEl=document.getElementById('send-btn')
+const statusEl =document.getElementById('status')
+
+function addMsg(cls,html){
+  const d=document.createElement('div')
+  d.className='entry '+cls; d.innerHTML=html
+  logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight
+  return d
+}
+
+function detectEmotion(t){
+  t=t.toLowerCase()
+  if(/\b(love|adore|heart|♥)\b/.test(t))                                             return 'love'
+  if(/\b(happy|great|wonderful|amazing|awesome|yay|fantastic|haha|😊|😄|🎉)\b/.test(t)) return 'happy'
+  if(/\b(sad|sorry|unfortunate|bad|awful|miss|lonely|😢|😞)\b/.test(t))               return 'sad'
+  if(/\b(angry|furious|hate|terrible|ridiculous|😠|😡)\b/.test(t))                    return 'angry'
+  if(/\b(wow|whoa|really|incredible|unbelievable|surprise|oh my|😮|😲)\b/.test(t))    return 'surprised'
+  return 'neutral'
+}
+
+async function send(){
+  const text=inputEl.value.trim()
+  if(!text||sendBtnEl.disabled)return
+  inputEl.value=''; sendBtnEl.disabled=true
+  statusEl.textContent='[ TRANSMITTING... ]'
+  addMsg('you','&gt; '+text)
+  setEmotion('thinking')
+  const te=addMsg('think','&gt; ...')
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:text})})
+    const j=await res.json()
+    te.remove()
+    if(j.error){
+      addMsg('err','&gt; ERROR: '+j.error)
+      statusEl.textContent='[ ERROR ] — '+j.error.substring(0,70)
+      setEmotion('sad',3500)
+    } else {
+      addMsg('bot','&gt; LETLET: '+j.reply)
+      statusEl.textContent='[ OK ]'
+      talking=true
+      const emo=detectEmotion(j.reply)
+      setEmotion(emo,5000)
+      setTimeout(()=>{talking=false},3200)
+    }
+  }catch(e){
+    te.remove()
+    addMsg('err','&gt; NETWORK ERROR: '+e.message)
+    statusEl.textContent='[ FAIL ]'
+    setEmotion('sad',3000)
+  }
+  sendBtnEl.disabled=false; inputEl.focus()
+}
+sendBtnEl.addEventListener('click',send)
+inputEl.addEventListener('keydown',e=>{if(e.key==='Enter')send()})
+
+// ── Boot emotion demo ─────────────────────────────
+;(function demo(){
+  const seq=[[400,'surprised'],[1600,'happy'],[3000,'sad'],[4400,'angry'],[5800,'love'],[7200,'thinking'],[8600,'neutral']]
+  seq.forEach(([t,e])=>setTimeout(()=>setEmotion(e),t))
+})()
+</script>
+</body>
+</html>

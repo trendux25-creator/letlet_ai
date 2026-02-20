@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Robot Companion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Robot Head -->
+        <div class="robot-head">
+            <!-- Eyes Container -->
+            <div class="eyes-container">
+                <!-- Left Eye -->
+                <div class="eye left-eye">
+                    <div class="pupil"></div>
+                    <div class="emotion-overlay"></div>
+                </div>
+                
+                <!-- Right Eye -->
+                <div class="eye right-eye">
+                    <div class="pupil"></div>
+                    <div class="emotion-overlay"></div>
+                </div>
+            </div>
+            
+            <!-- Mouth -->
+            <div class="mouth">
+                <svg viewBox="0 0 100 50" class="mouth-svg">
+                    <path class="mouth-path" d="M 10 25 Q 50 45 90 25" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
+            <!-- Status Indicator -->
+            <div class="status-light"></div>
+        </div>
+        
+        <!-- Chat Interface -->
+        <div class="chat-interface">
+            <div class="chat-display">
+                <div class="messages-container">
+                    <div class="message-group initial-greeting">
+                        <div class="robot-message">
+                            <p>👋 Hello! I'm your AI companion. Ask me anything!</p>
+                        </div>
+                    </div>
+                    <div id="messages"></div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="input-area">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="Ask me something..."
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
