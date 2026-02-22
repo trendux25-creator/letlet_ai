@@ -1,3 +1,22 @@
+# Virtualenvs
+venv/
+env/
+
+# Python cache
+__pycache__/
+.pytest_cache/
+
+# Env files (don't commit real API keys)
+.env
+.env.*
+
+# OS files
+.DS_Store
+
+# Editor files
+*.swp
+.idea/
+.vscode/
 .env
 venv/
 __pycache__/

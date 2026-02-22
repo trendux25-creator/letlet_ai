@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LetLet AI</title>
+<title>CRIMSON AI</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -15,10 +15,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
 
-/* ── PARTICLES BG ─────────────────────────────────── */
 #bgCanvas{position:fixed;inset:0;z-index:0}
 
-/* ── CRT overlay ──────────────────────────────────── */
 body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background:repeating-linear-gradient(
@@ -28,7 +26,6 @@ body::after{
   );
 }
 
-/* ── MAIN LAYOUT ──────────────────────────────────── */
 .scene{
   position:relative;z-index:1;
   width:100vw;height:100vh;
@@ -36,7 +33,6 @@ body::after{
   align-items:center;justify-content:center;
 }
 
-/* ── TOP STATUS BAR ───────────────────────────────── */
 .topbar{
   position:fixed;top:0;left:0;right:0;
   display:flex;align-items:center;justify-content:space-between;
@@ -65,7 +61,6 @@ body::after{
 }
 @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ── FACE CANVAS ──────────────────────────────────── */
 #faceCanvas{
   display:block;
   width:min(92vw,900px);
@@ -74,7 +69,6 @@ body::after{
   filter:drop-shadow(0 0 40px rgba(0,255,231,0.08));
 }
 
-/* ── EMOTION LABEL ────────────────────────────────── */
 #emoLabel{
   font-family:'Share Tech Mono',monospace;
   font-size:clamp(10px,1vw,12px);
@@ -86,7 +80,6 @@ body::after{
   transition:color .5s;
 }
 
-/* ── CHAT PANEL ───────────────────────────────────── */
 .chat{
   position:fixed;bottom:0;left:0;right:0;
   z-index:100;
@@ -94,7 +87,6 @@ body::after{
   background:linear-gradient(0deg,rgba(3,8,15,0.97) 60%,transparent);
 }
 
-/* log */
 .log{
   max-width:860px;margin:0 auto 10px;
   height:clamp(60px,12vh,110px);
@@ -114,7 +106,6 @@ body::after{
 .think {color:rgba(0,255,231,0.3);font-style:italic}
 .err   {color:#ff4466}
 
-/* input row */
 .input-row{
   max-width:860px;margin:0 auto;
   display:flex;align-items:center;gap:12px;
@@ -154,6 +145,48 @@ body::after{
 .send-btn:hover{background:rgba(0,255,231,0.18);box-shadow:0 0 18px rgba(0,255,231,0.2)}
 .send-btn:disabled{opacity:.25;cursor:not-allowed}
 
+.mic-btn{
+  padding:10px 14px;
+  background:rgba(0,255,231,0.06);
+  border:1px solid rgba(0,255,231,0.3);
+  border-radius:4px;
+  color:var(--c1);
+  font-size:16px;
+  cursor:pointer;
+  transition:all .25s;
+  line-height:1;
+}
+.mic-btn:hover{background:rgba(0,255,231,0.15);box-shadow:0 0 12px rgba(0,255,231,0.15)}
+.mic-btn.recording{
+  background:rgba(255,50,50,0.2);
+  border-color:rgba(255,80,80,0.7);
+  color:#ff5555;
+  animation:micPulse 1s ease-in-out infinite;
+}
+.mic-btn:disabled{opacity:.25;cursor:not-allowed}
+@keyframes micPulse{
+  0%,100%{box-shadow:0 0 6px rgba(255,50,50,0.2)}
+  50%{box-shadow:0 0 18px rgba(255,50,50,0.5)}
+}
+
+.voice-btn{
+  padding:10px 14px;
+  background:rgba(160,80,255,0.06);
+  border:1px solid rgba(160,80,255,0.3);
+  border-radius:4px;
+  color:rgb(180,140,255);
+  font-size:15px;
+  cursor:pointer;
+  transition:all .25s;
+  line-height:1;
+}
+.voice-btn:hover{background:rgba(160,80,255,0.15);box-shadow:0 0 12px rgba(160,80,255,0.15)}
+.voice-btn.active{
+  background:rgba(160,80,255,0.2);
+  border-color:rgb(160,80,255);
+  box-shadow:0 0 14px rgba(160,80,255,0.25);
+}
+
 .statusbar{
   max-width:860px;margin:6px auto 0;
   font-family:'Share Tech Mono',monospace;
@@ -161,38 +194,446 @@ body::after{
   color:rgba(0,255,231,0.25);
   text-align:right;
 }
+
+.sim-panel{
+  position:fixed;right:18px;top:50%;transform:translateY(-50%);
+  z-index:200;
+  display:flex;flex-direction:column;gap:0;
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.sim-panel.collapsed .sim-grid{
+  max-height:0;opacity:0;padding:0 10px;pointer-events:none;
+  border-color:transparent;
+}
+.sim-toggle{
+  align-self:flex-end;
+  padding:8px 14px;
+  background:rgba(0,255,231,0.08);
+  border:1px solid rgba(0,255,231,0.35);
+  border-radius:6px;
+  color:var(--c1);
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;font-weight:700;
+  letter-spacing:.18em;
+  cursor:pointer;
+  transition:background .25s,box-shadow .25s;
+  margin-bottom:6px;
+  white-space:nowrap;
+}
+.sim-toggle:hover{background:rgba(0,255,231,0.18);box-shadow:0 0 14px rgba(0,255,231,0.15)}
+.sim-grid{
+  display:flex;flex-direction:column;gap:6px;
+  padding:12px 10px;
+  background:rgba(3,8,15,0.92);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(0,255,231,0.18);
+  border-radius:8px;
+  max-height:600px;opacity:1;
+  overflow:hidden;
+  transition:max-height .35s ease,opacity .25s ease,padding .3s ease,border-color .3s;
+}
+.sim-grid .sim-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:.3em;
+  color:rgba(0,255,231,0.35);
+  text-transform:uppercase;
+  margin-bottom:2px;
+  padding-left:2px;
+}
+.sim-btn{
+  padding:9px 18px;
+  background:rgba(0,255,231,0.05);
+  border:1px solid rgba(0,255,231,0.22);
+  border-radius:5px;
+  color:var(--c1);
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  letter-spacing:.12em;
+  cursor:pointer;
+  text-align:left;
+  transition:background .2s,border-color .2s,box-shadow .2s,color .2s;
+  white-space:nowrap;
+}
+.sim-btn:hover{
+  background:rgba(0,255,231,0.14);
+  border-color:rgba(0,255,231,0.5);
+  box-shadow:0 0 12px rgba(0,255,231,0.12);
+}
+.sim-btn.active{
+  background:rgba(0,255,231,0.18);
+  border-color:var(--c1);
+  box-shadow:0 0 18px rgba(0,255,231,0.2);
+}
+.sim-btn .emo-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-right:8px;vertical-align:middle;
+}
+.sim-btn.talk-btn{
+  margin-top:4px;
+  border-color:rgba(160,80,255,0.35);
+  color:rgb(180,140,255);
+}
+.sim-btn.talk-btn:hover{
+  background:rgba(160,80,255,0.14);
+  border-color:rgba(160,80,255,0.6);
+  box-shadow:0 0 12px rgba(160,80,255,0.15);
+}
+.sim-btn.talk-btn.active{
+  background:rgba(160,80,255,0.22);
+  border-color:rgb(160,80,255);
+  box-shadow:0 0 18px rgba(160,80,255,0.25);
+  animation:talkPulse 1s ease-in-out infinite;
+}
+@keyframes talkPulse{
+  0%,100%{box-shadow:0 0 12px rgba(160,80,255,0.2)}
+  50%{box-shadow:0 0 22px rgba(160,80,255,0.4)}
+}
+.sim-btn.ambient-btn{
+  border-color:rgba(0,180,160,0.35);
+  color:rgb(100,220,200);
+}
+.sim-btn.ambient-btn:hover{
+  background:rgba(0,180,160,0.14);
+  border-color:rgba(0,180,160,0.6);
+  box-shadow:0 0 12px rgba(0,180,160,0.15);
+}
+.sim-btn.ambient-btn.active{
+  background:rgba(0,180,160,0.22);
+  border-color:rgb(0,220,200);
+  box-shadow:0 0 18px rgba(0,220,200,0.25);
+  animation:ambientPulse 3s ease-in-out infinite;
+}
+@keyframes ambientPulse{
+  0%,100%{box-shadow:0 0 10px rgba(0,200,180,0.15)}
+  50%{box-shadow:0 0 20px rgba(0,200,180,0.35)}
+}
+
+@media (max-width:600px){
+  .sim-panel{right:8px;top:auto;bottom:140px;transform:none}
+  .sim-btn{padding:7px 12px;font-size:10px}
+}
+
+/* ── YouTube Now-Playing Banner ──────────────── */
+#ytBanner{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  z-index:50;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  padding:12px 20px;
+  background:linear-gradient(180deg,transparent,rgba(3,8,15,0.95));
+  pointer-events:none;
+}
+#ytBanner.active{
+  display:flex;
+  pointer-events:auto;
+}
+#ytBanner .np-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#ff3344;
+  box-shadow:0 0 8px rgba(255,50,70,0.6);
+  animation:npPulse 1.5s ease-in-out infinite;
+}
+#ytBanner .yt-banner-text{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(11px,1.3vw,14px);
+  font-weight:700;
+  letter-spacing:.12em;
+  color:var(--c1);
+  text-shadow:0 0 12px rgba(0,255,231,0.3);
+}
+#ytBanner .yt-banner-sub{
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  letter-spacing:.15em;
+  color:rgba(0,255,231,0.35);
+}
+#ytBanner .yt-stop-btn{
+  padding:8px 20px;
+  background:rgba(255,50,50,0.08);
+  border:1px solid rgba(255,80,80,0.4);
+  border-radius:5px;
+  color:#ff5555;
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.15em;
+  cursor:pointer;
+  transition:all .25s;
+}
+#ytBanner .yt-stop-btn:hover{
+  background:rgba(255,50,50,0.18);
+  box-shadow:0 0 14px rgba(255,50,50,0.2);
+}
+@keyframes npPulse{
+  0%,100%{opacity:1;box-shadow:0 0 8px rgba(255,50,70,0.6)}
+  50%{opacity:.4;box-shadow:0 0 4px rgba(255,50,70,0.3)}
+}
+
+/* ── Smart Dashboard Overlay ────────────────── */
+#dashOverlay{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  z-index:40;
+  display:none;
+  background:rgba(3,8,15,0.92);
+  backdrop-filter:blur(8px);
+}
+#dashOverlay.active{
+  display:flex;
+}
+#dashOverlay .dash-layout{
+  display:flex;
+  width:100%;height:100%;
+  padding:50px 24px 24px;
+  gap:20px;
+}
+#dashOverlay .dash-face{
+  flex:0 0 280px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#dashOverlay .dash-face canvas{
+  width:280px;
+  height:200px;
+  border-radius:10px;
+}
+#dashOverlay .dash-content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  overflow-y:auto;
+  padding:10px 0;
+}
+.dash-greeting{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(18px,3vw,32px);
+  font-weight:700;
+  color:var(--c1);
+  text-shadow:0 0 20px rgba(0,255,231,0.3);
+  letter-spacing:.08em;
+}
+.dash-date{
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(12px,1.5vw,16px);
+  color:rgba(0,255,231,0.4);
+  letter-spacing:.2em;
+  margin-top:-8px;
+}
+.dash-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:14px;
+  margin-top:8px;
+}
+.dash-card{
+  padding:18px 20px;
+  background:rgba(0,255,231,0.03);
+  border:1px solid rgba(0,255,231,0.12);
+  border-radius:10px;
+  transition:border-color .3s, box-shadow .3s;
+}
+.dash-card:hover{
+  border-color:rgba(0,255,231,0.3);
+  box-shadow:0 0 20px rgba(0,255,231,0.05);
+}
+.dash-card .card-icon{
+  font-size:24px;
+  margin-bottom:8px;
+}
+.dash-card .card-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  letter-spacing:.3em;
+  color:rgba(0,255,231,0.35);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.dash-card .card-value{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(18px,2.5vw,28px);
+  font-weight:700;
+  color:var(--c1);
+  text-shadow:0 0 10px rgba(0,255,231,0.2);
+}
+.dash-card .card-sub{
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  color:rgba(0,255,231,0.3);
+  letter-spacing:.1em;
+  margin-top:4px;
+}
+.dash-card.weather-card .card-value{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.dash-card.weather-card .wx-icon{
+  width:48px;height:48px;
+  filter:drop-shadow(0 0 6px rgba(0,255,231,0.2));
+}
+.dash-card.memory-card{
+  border-color:rgba(160,80,255,0.15);
+}
+.dash-card.memory-card .card-value{
+  color:rgb(180,140,255);
+  font-size:clamp(14px,1.8vw,20px);
+}
+.dash-card.quote-card{
+  grid-column:1/-1;
+  border-color:rgba(255,180,0,0.12);
+}
+.dash-card.quote-card .card-value{
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(12px,1.3vw,15px);
+  font-weight:400;
+  color:rgba(255,220,100,0.7);
+  font-style:italic;
+  text-shadow:none;
+  line-height:1.6;
+}
+.dash-close{
+  position:absolute;
+  top:14px;right:20px;
+  padding:8px 20px;
+  background:rgba(0,255,231,0.06);
+  border:1px solid rgba(0,255,231,0.25);
+  border-radius:5px;
+  color:var(--c1);
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.15em;
+  cursor:pointer;
+  z-index:41;
+  transition:all .25s;
+}
+.dash-close:hover{
+  background:rgba(0,255,231,0.15);
+  box-shadow:0 0 14px rgba(0,255,231,0.15);
+}
+@media(max-width:700px){
+  #dashOverlay .dash-layout{flex-direction:column;padding:50px 14px 14px}
+  #dashOverlay .dash-face{flex:0 0 auto}
+  .dash-cards{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- particles -->
 <canvas id="bgCanvas"></canvas>
 
 <div class="topbar">
-  <span class="logo">LETLET</span>
-  <span><span class="dot"></span>SYSTEM ONLINE</span>
+  <span class="logo">CRIMSON</span>
+  <span><span class="dot"></span><span id="sysStatus">SYSTEM ONLINE</span></span>
   <span id="clock">--:--:--</span>
 </div>
 
 <div class="scene">
   <canvas id="faceCanvas"></canvas>
   <div id="emoLabel">◈ NEUTRAL ◈</div>
+  <!-- YouTube Now-Playing Banner -->
+  <!-- YouTube Overlay -->
+  <div id="ytOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+    <button id="ytClose" style="position:absolute;top:24px;right:32px;font-size:2em;background:#fff;border:none;border-radius:50%;width:48px;height:48px;cursor:pointer;">&times;</button>
+    <iframe id="ytPlayer" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay" style="border-radius:16px;box-shadow:0 0 32px #000"></iframe>
+    <div id="ytTitle" style="margin-top:18px;color:#fff;font-size:1.3em;text-align:center"></div>
+  </div>
+  <!-- Smart Dashboard Overlay -->
+  <div id="dashOverlay">
+    <button class="dash-close" id="dashClose">◈ CLOSE DASHBOARD</button>
+    <div class="dash-layout">
+      <div class="dash-face">
+        <canvas id="dashFace" width="280" height="200"></canvas>
+      </div>
+      <div class="dash-content">
+        <div class="dash-greeting" id="dashGreeting">Good day!</div>
+        <div class="dash-date" id="dashDate">—</div>
+        <div class="dash-cards">
+          <div class="dash-card">
+            <div class="card-icon">🕐</div>
+            <div class="card-label">time</div>
+            <div class="card-value" id="dashTime">--:--</div>
+            <div class="card-sub" id="dashTimeSub">—</div>
+          </div>
+          <div class="dash-card weather-card">
+            <div class="card-icon">🌤️</div>
+            <div class="card-label">weather</div>
+            <div class="card-value" id="dashWeather">—</div>
+            <div class="card-sub" id="dashWeatherSub">—</div>
+          </div>
+          <div class="dash-card memory-card">
+            <div class="card-icon">🧠</div>
+            <div class="card-label">memory</div>
+            <div class="card-value" id="dashMemory">0 messages</div>
+            <div class="card-sub" id="dashMemorySub">conversation history</div>
+          </div>
+          <div class="dash-card">
+            <div class="card-icon">⚡</div>
+            <div class="card-label">system</div>
+            <div class="card-value" id="dashSystem">ONLINE</div>
+            <div class="card-sub" id="dashSystemSub">—</div>
+          </div>
+          <div class="dash-card quote-card">
+            <div class="card-icon">💬</div>
+            <div class="card-label">crimson says</div>
+            <div class="card-value" id="dashQuote">"Hey there! I'm ready whenever you are."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sim-panel" id="simPanel">
+  <button class="sim-toggle" id="simToggle">◈ SIM</button>
+  <div class="sim-grid">
+    <span class="sim-label">expressions</span>
+    <button class="sim-btn" data-emo="happy"><span class="emo-dot" style="background:#ffdc00"></span>HAPPY</button>
+    <button class="sim-btn" data-emo="sad"><span class="emo-dot" style="background:#3c82ff"></span>SAD</button>
+    <button class="sim-btn" data-emo="angry"><span class="emo-dot" style="background:#ff2828"></span>ANGRY</button>
+    <button class="sim-btn" data-emo="surprised"><span class="emo-dot" style="background:#ff8c00"></span>SURPRISED</button>
+    <button class="sim-btn" data-emo="thinking"><span class="emo-dot" style="background:#a050ff"></span>THINKING</button>
+    <button class="sim-btn" data-emo="love"><span class="emo-dot" style="background:#ff50b4"></span>LOVE</button>
+    <button class="sim-btn" data-emo="neutral"><span class="emo-dot" style="background:#00ffe7"></span>NEUTRAL</button>
+    <span class="sim-label" style="margin-top:6px">animation</span>
+    <button class="sim-btn talk-btn" id="talkToggle">◈ TALK</button>
+    <span class="sim-label" style="margin-top:6px">mode</span>
+    <button class="sim-btn ambient-btn" id="ambientToggle">◈ AMBIENT</button>
+    <button class="sim-btn ambient-btn" id="dashToggle">◈ DASHBOARD</button>
+  </div>
 </div>
 
 <div class="chat">
   <div class="log" id="log">
-    <div class="entry bot">&gt; BOOT COMPLETE — LetLet AI v3.1 READY</div>
+    <div class="entry bot">&gt; BOOT COMPLETE — CRIMSON v3.1 READY</div>
     <div class="entry bot">&gt; Say hello or ask me anything...</div>
   </div>
   <div class="input-row">
     <span class="pfx">&gt;_</span>
-    <input id="prompt" type="text" placeholder="Ask me anything..." autocomplete="off"/>
+    <input id="prompt" type="text" placeholder="Ask CRIMSON anything..." autocomplete="off"/>
+    <button class="mic-btn" id="mic-btn" title="Click to speak">🎤</button>
+    <button class="voice-btn" id="voice-toggle" title="Toggle CRIMSON voice output">🔇</button>
     <button class="send-btn" id="send-btn">TRANSMIT</button>
   </div>
   <div class="statusbar" id="status">[ IDLE ]</div>
 </div>
 
 <script>
+// ════════════════════════════════════════════════
+//  GLOBALS
+// ════════════════════════════════════════════════
+const logEl    = document.getElementById('log')
+const inputEl  = document.getElementById('prompt')
+const sendBtnEl= document.getElementById('send-btn')
+const statusEl = document.getElementById('status')
+const micBtn   = document.getElementById('mic-btn')
+const voiceToggleBtn = document.getElementById('voice-toggle')
+
 // ════════════════════════════════════════════════
 //  CLOCK
 // ════════════════════════════════════════════════
@@ -226,10 +667,9 @@ function drawBg(){
     if(p.y<0)p.y=BH; if(p.y>BH)p.y=0
     bctx.beginPath()
     bctx.arc(p.x,p.y,p.r,0,Math.PI*2)
-    bctx.fillStyle=`rgba(0,255,231,${p.a*0.18})`
+    bctx.fillStyle='rgba(0,255,231,'+p.a*0.18+')'
     bctx.fill()
   })
-  // faint connection lines
   for(let i=0;i<PARTS.length;i++){
     for(let j=i+1;j<PARTS.length;j++){
       const dx=PARTS[i].x-PARTS[j].x, dy=PARTS[i].y-PARTS[j].y
@@ -238,7 +678,7 @@ function drawBg(){
         bctx.beginPath()
         bctx.moveTo(PARTS[i].x,PARTS[i].y)
         bctx.lineTo(PARTS[j].x,PARTS[j].y)
-        bctx.strokeStyle=`rgba(0,255,231,${(1-d/110)*0.045})`
+        bctx.strokeStyle='rgba(0,255,231,'+(1-d/110)*0.045+')'
         bctx.lineWidth=.6
         bctx.stroke()
       }
@@ -254,11 +694,12 @@ const fctx = fc.getContext('2d')
 let FW, FH
 function resizeFace(){
   const r=fc.getBoundingClientRect()
-  FW=fc.width=r.width; FH=fc.height=r.height
+  if(r.width > 0 && r.height > 0){
+    FW=fc.width=r.width; FH=fc.height=r.height
+  }
 }
 resizeFace(); window.addEventListener('resize',resizeFace)
 
-// ── Emotion definitions ──────────────────────────
 const EMO={
   neutral  :{rgb:[0,255,231], glow:[0,255,231], mouth:0,    brow:0,    lid:0,    ps:1.0,  label:'NEUTRAL'},
   happy    :{rgb:[255,220,0], glow:[255,180,0], mouth:.6,   brow:-.22, lid:.12,  ps:1.18, label:'HAPPY'},
@@ -266,82 +707,70 @@ const EMO={
   angry    :{rgb:[255,40,40], glow:[200,0,0],   mouth:-.32, brow:.5,   lid:.38,  ps:1.25, label:'ANGRY'},
   surprised:{rgb:[255,140,0], glow:[255,100,0], mouth:.05,  brow:-.45, lid:-.12, ps:1.6,  label:'SURPRISED'},
   thinking :{rgb:[160,80,255],glow:[120,40,255],mouth:.12,  brow:.12,  lid:.15,  ps:.88,  label:'THINKING'},
-  love     :{rgb:[255,80,180],glow:[255,40,140],mouth:.65,  brow:-.25, lid:.2,   ps:1.1,  label:'LOVE ♥'},
+  love     :{rgb:[255,80,180],glow:[255,40,140],mouth:.65,  brow:-.25, lid:.2,   ps:1.1,  label:'LOVE'},
 }
 
-// lerp state
 const cur={rgb:[0,255,231],glow:[0,255,231],mouth:0,brow:0,lid:0,ps:1}
 const tgt={rgb:[0,255,231],glow:[0,255,231],mouth:0,brow:0,lid:0,ps:1}
 let curEmoName='neutral'
 
-function setEmotion(name,dur=0){
+function setEmotion(name,dur){
   if(!EMO[name])name='neutral'
   curEmoName=name
   const e=EMO[name]
   tgt.rgb=[...e.rgb]; tgt.glow=[...e.glow]
   tgt.mouth=e.mouth; tgt.brow=e.brow; tgt.lid=e.lid; tgt.ps=e.ps
   document.getElementById('emoLabel').textContent='◈ '+e.label+' ◈'
-  document.getElementById('emoLabel').style.color=`rgba(${e.rgb[0]},${e.rgb[1]},${e.rgb[2]},0.5)`
-  if(dur>0)setTimeout(()=>setEmotion('neutral'),dur)
+  document.getElementById('emoLabel').style.color='rgba('+e.rgb[0]+','+e.rgb[1]+','+e.rgb[2]+',0.5)'
+  if(dur>0)setTimeout(function(){setEmotion('neutral')},dur)
 }
 setEmotion('neutral')
 
 function lN(a,b,t){return a+(b-a)*t}
-function lA(a,b,t){return a.map((v,i)=>lN(v,b[i],t))}
-function rgba(rgb,a){return `rgba(${rgb[0]|0},${rgb[1]|0},${rgb[2]|0},${a})`}
+function lA(a,b,t){return a.map(function(v,i){return lN(v,b[i],t)})}
+function rgba(rgb,a){return 'rgba('+(rgb[0]|0)+','+(rgb[1]|0)+','+(rgb[2]|0)+','+a+')'}
 
-// mouse
 let mx=window.innerWidth/2, my=window.innerHeight/2
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY})
-// Reset to center if mouse leaves the window
-document.addEventListener('mouseleave',()=>{mx=window.innerWidth/2;my=window.innerHeight/2})
+document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY})
+document.addEventListener('mouseleave',function(){mx=window.innerWidth/2;my=window.innerHeight/2})
 
-// blink
 let blinkNext=2000+Math.random()*2500, blinkT=0, blinkDur=0
-// talk
 let talkT=0, talking=false
 
-// ── Draw one eye (fully redrawn each frame) ──────
 function eye(cx,cy,ew,eh,lid,px,py,ps,rgb,glow,brow,side){
-  // outer glow ring
-  const og=fctx.createRadialGradient(cx,cy,ew*.3,cx,cy,ew*1.6)
+  var og=fctx.createRadialGradient(cx,cy,ew*.3,cx,cy,ew*1.6)
   og.addColorStop(0,rgba(glow,.18))
   og.addColorStop(1,rgba(glow,0))
   fctx.beginPath(); fctx.ellipse(cx,cy,ew*1.6,eh*1.6,0,0,Math.PI*2)
   fctx.fillStyle=og; fctx.fill()
 
-  // socket
   fctx.beginPath(); fctx.ellipse(cx,cy,ew,eh,0,0,Math.PI*2)
   fctx.fillStyle='#020a12'
   fctx.fill()
   fctx.strokeStyle=rgba(rgb,.85); fctx.lineWidth=2.5; fctx.stroke()
 
-  // clip
   fctx.save()
   fctx.beginPath(); fctx.ellipse(cx,cy,ew-1,eh-1,0,0,Math.PI*2); fctx.clip()
 
-  // scan sweep
-  const now=performance.now()
-  const scanY=cy-eh+((now%2200)/2200)*eh*2
-  const sg=fctx.createLinearGradient(0,scanY-eh*.3,0,scanY+eh*.3)
+  var now=performance.now()
+  var scanY=cy-eh+((now%2200)/2200)*eh*2
+  var sg=fctx.createLinearGradient(0,scanY-eh*.3,0,scanY+eh*.3)
   sg.addColorStop(0,rgba(rgb,0))
   sg.addColorStop(.5,rgba(rgb,.1))
   sg.addColorStop(1,rgba(rgb,0))
   fctx.fillStyle=sg
   fctx.fillRect(cx-ew,scanY-eh*.3,ew*2,eh*.6)
 
-  // grid
   fctx.strokeStyle=rgba(rgb,.055); fctx.lineWidth=.8
-  for(let gx=cx-ew;gx<cx+ew;gx+=13){
+  for(var gx=cx-ew;gx<cx+ew;gx+=13){
     fctx.beginPath();fctx.moveTo(gx,cy-eh);fctx.lineTo(gx,cy+eh);fctx.stroke()
   }
-  for(let gy=cy-eh;gy<cy+eh;gy+=13){
+  for(var gy=cy-eh;gy<cy+eh;gy+=13){
     fctx.beginPath();fctx.moveTo(cx-ew,gy);fctx.lineTo(cx+ew,gy);fctx.stroke()
   }
 
-  // iris gradient
-  const ir=eh*.56*ps
-  const ig=fctx.createRadialGradient(cx+px*.4,cy+py*.4-ir*.15,ir*.06,cx+px*.4,cy+py*.4,ir)
+  var ir=eh*.56*ps
+  var ig=fctx.createRadialGradient(cx+px*.4,cy+py*.4-ir*.15,ir*.06,cx+px*.4,cy+py*.4,ir)
   ig.addColorStop(0,rgba(rgb,.95))
   ig.addColorStop(.4,rgba(rgb,.4))
   ig.addColorStop(1,rgba(rgb,.04))
@@ -349,22 +778,18 @@ function eye(cx,cy,ew,eh,lid,px,py,ps,rgb,glow,brow,side){
   fctx.fillStyle=ig; fctx.fill()
   fctx.strokeStyle=rgba(rgb,.6); fctx.lineWidth=1.5; fctx.stroke()
 
-  // inner iris ring
   fctx.beginPath(); fctx.arc(cx+px,cy+py,ir*.65,0,Math.PI*2)
   fctx.strokeStyle=rgba(rgb,.2); fctx.lineWidth=1; fctx.stroke()
 
-  // pupil
-  const pr=ir*.36
+  var pr=ir*.36
   fctx.beginPath(); fctx.arc(cx+px,cy+py,pr,0,Math.PI*2)
   fctx.fillStyle='#000'; fctx.fill()
 
-  // pupil core glow
-  const pg=fctx.createRadialGradient(cx+px,cy+py,0,cx+px,cy+py,pr*.8)
+  var pg=fctx.createRadialGradient(cx+px,cy+py,0,cx+px,cy+py,pr*.8)
   pg.addColorStop(0,rgba(rgb,1)); pg.addColorStop(1,rgba(rgb,0))
   fctx.beginPath(); fctx.arc(cx+px,cy+py,pr*.8,0,Math.PI*2)
   fctx.fillStyle=pg; fctx.fill()
 
-  // shine
   fctx.beginPath()
   fctx.arc(cx+px-pr*.38,cy+py-pr*.45,pr*.26,0,Math.PI*2)
   fctx.fillStyle='rgba(255,255,255,.6)'; fctx.fill()
@@ -372,10 +797,9 @@ function eye(cx,cy,ew,eh,lid,px,py,ps,rgb,glow,brow,side){
   fctx.arc(cx+px+pr*.28,cy+py-pr*.3,pr*.12,0,Math.PI*2)
   fctx.fillStyle='rgba(255,255,255,.3)'; fctx.fill()
 
-  fctx.restore() // end clip
+  fctx.restore()
 
-  // eyelid
-  const effLid=Math.max(0,lid)
+  var effLid=Math.max(0,lid)
   if(effLid>0.01){
     fctx.save()
     fctx.beginPath()
@@ -384,16 +808,15 @@ function eye(cx,cy,ew,eh,lid,px,py,ps,rgb,glow,brow,side){
     fctx.restore()
   }
 
-  // bottom shadow
-  const bg2=fctx.createLinearGradient(0,cy,0,cy+eh)
+  var bg2=fctx.createLinearGradient(0,cy,0,cy+eh)
   bg2.addColorStop(0,rgba(rgb,.1)); bg2.addColorStop(1,rgba(rgb,0))
   fctx.beginPath(); fctx.ellipse(cx,cy,ew,eh,0,0,Math.PI)
   fctx.fillStyle=bg2; fctx.fill()
 
-  // corner brackets
-  const bx=ew+10,by=eh+8,bs=14
+  var bx=ew+10,by=eh+8,bs=14
   fctx.strokeStyle=rgba(rgb,.45); fctx.lineWidth=2; fctx.lineCap='square'
-  ;[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy])=>{
+  ;[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(c){
+    var sx=c[0],sy=c[1]
     fctx.beginPath()
     fctx.moveTo(cx+sx*(bx-bs),cy+sy*by)
     fctx.lineTo(cx+sx*bx,cy+sy*by)
@@ -401,24 +824,21 @@ function eye(cx,cy,ew,eh,lid,px,py,ps,rgb,glow,brow,side){
     fctx.stroke()
   })
 
-  // eyebrow
-  const bwHalf=ew*.85
-  const bBase=cy-eh-18
-  const ang=brow*(side==='L'?1:-1)
+  var bwHalf=ew*.85
+  var bBase=cy-eh-18
+  var ang=brow*(side==='L'?1:-1)
   fctx.save(); fctx.translate(cx,bBase)
   fctx.beginPath()
   fctx.moveTo(-bwHalf, ang*20)
   fctx.lineTo( bwHalf,-ang*20)
   fctx.strokeStyle=rgba(rgb,.8); fctx.lineWidth=4.5; fctx.lineCap='round'; fctx.stroke()
-  // brow glow
   fctx.strokeStyle=rgba(glow,.15); fctx.lineWidth=10; fctx.stroke()
   fctx.restore()
 }
 
-// ── Draw mouth ────────────────────────────────────
 function mouth(cx,cy,mw,curve,tph){
-  const mh=Math.abs(curve)*mw*.42
-  const openAmt=tph>0?Math.abs(Math.sin(tph))*10:0
+  var mh=Math.abs(curve)*mw*.42
+  var openAmt=tph>0?Math.abs(Math.sin(tph))*10:0
 
   fctx.save()
   fctx.lineCap='round'
@@ -426,7 +846,6 @@ function mouth(cx,cy,mw,curve,tph){
   fctx.shadowColor=rgba(cur.glow,.7); fctx.shadowBlur=14
 
   if(Math.abs(curve)<.05){
-    // flat with talking
     if(openAmt>1){
       fctx.beginPath()
       fctx.ellipse(cx,cy,mw/2,openAmt*.6,0,0,Math.PI*2)
@@ -437,12 +856,10 @@ function mouth(cx,cy,mw,curve,tph){
       fctx.strokeStyle=rgba(cur.rgb,.85); fctx.stroke()
     }
   } else if(curve>0){
-    // smile
     fctx.beginPath()
     fctx.moveTo(cx-mw/2,cy)
     fctx.quadraticCurveTo(cx,cy+mh+openAmt,cx+mw/2,cy)
     fctx.strokeStyle=rgba(cur.rgb,.9); fctx.stroke()
-    // teeth hint on big smile
     if(curve>.45){
       fctx.beginPath()
       fctx.moveTo(cx-mw/2+8,cy+4)
@@ -450,7 +867,6 @@ function mouth(cx,cy,mw,curve,tph){
       fctx.fillStyle='rgba(255,255,255,0.7)'; fctx.fill()
     }
   } else {
-    // frown
     fctx.beginPath()
     fctx.moveTo(cx-mw/2,cy)
     fctx.quadraticCurveTo(cx,cy-mh-openAmt,cx+mw/2,cy)
@@ -460,13 +876,18 @@ function mouth(cx,cy,mw,curve,tph){
 }
 
 // ── MAIN LOOP ─────────────────────────────────────
-let lastT=0
+var lastT=0
 function loop(ts){
   requestAnimationFrame(loop)
-  const dt=Math.min((ts-lastT)/1000,.05); lastT=ts
+  var dt=Math.min((ts-lastT)/1000,.05); lastT=ts
 
-  // lerp
-  const sp=dt*5
+  // Skip face drawing when canvas is hidden (YouTube/dashboard overlay)
+  if(!FW || !FH || FW < 1 || FH < 1){
+    drawBg()
+    return
+  }
+
+  var sp=dt*5
   cur.rgb  =lA(cur.rgb,  tgt.rgb,  sp*2.8)
   cur.glow =lA(cur.glow, tgt.glow, sp*2.8)
   cur.mouth=lN(cur.mouth,tgt.mouth,sp*2.2)
@@ -474,87 +895,86 @@ function loop(ts){
   cur.lid  =lN(cur.lid,  tgt.lid,  sp*3)
   cur.ps   =lN(cur.ps,   tgt.ps,   sp*3)
 
-  // blink
   blinkNext-=dt*1000
-  let blid=0
+  var blid=0
   if(blinkNext<=0){blinkT=0;blinkDur=140;blinkNext=2400+Math.random()*2800}
   if(blinkDur>0){blinkT+=dt*1000;blid=Math.sin((blinkT/blinkDur)*Math.PI);if(blinkT>=blinkDur)blinkDur=0}
 
-  // talk
   if(talking) talkT+=dt*12
   else talkT*=.85
 
-  // bg
+  ambientTick(dt)
   drawBg()
-
-  // face clear
   fctx.clearRect(0,0,FW,FH)
 
-  // layout
-  const ew=FW*.155, eh=FH*.28
-  const ey=FH*.4
-  const gap=FW*.3
-  const lx=FW/2-gap/2, rx=FW/2+gap/2
+  var ew=FW*.155, eh=FH*.28
+  var ey=FH*.4
+  var gap=FW*.3
+  var lx=FW/2-gap/2, rx=FW/2+gap/2
 
-  // pupil offset — only move when mouse is very close to the face, stay forward otherwise
   function pOff(ecx,ecy){
-    const rect=fc.getBoundingClientRect()
-    const dx=mx-(rect.left+ecx), dy=my-(rect.top+ecy)
-    const d=Math.sqrt(dx*dx+dy*dy)||1
-    const influenceRadius = ew * 2.5   // only react within this distance
-    const maxShift = ew * 0.10         // tiny nudge — pupils stay mostly centered
+    var rect=fc.getBoundingClientRect()
+    var dx=mx-(rect.left+ecx), dy=my-(rect.top+ecy)
+    var d=Math.sqrt(dx*dx+dy*dy)||1
+    var influenceRadius = ew * 2.5
+    var maxShift = ew * 0.10
     if(d > influenceRadius) return [0, 0]
-    const strength = 1 - (d / influenceRadius)  // fades out as mouse moves away
-    const f = (Math.min(maxShift, d) / d) * strength
+    var strength = 1 - (d / influenceRadius)
+    var f = (Math.min(maxShift, d) / d) * strength
     return [dx*f, dy*f]
   }
-  const [lox,loy]=pOff(lx,ey)
-  const [rox,roy]=pOff(rx,ey)
-  const lid=Math.max(cur.lid,blid)
+  var lo=pOff(lx,ey)
+  var ro=pOff(rx,ey)
 
-  eye(lx,ey,ew,eh,lid,lox,loy,cur.ps,cur.rgb,cur.glow,cur.brow,'L')
-  eye(rx,ey,ew,eh,lid,rox,roy,cur.ps,cur.rgb,cur.glow,cur.brow,'R')
+  var amb = ambientPupilOffset(ew)
+  var finalLox = lo[0] + amb[0], finalLoy = lo[1] + amb[1]
+  var finalRox = ro[0] + amb[0], finalRoy = ro[1] + amb[1]
 
-  // nose
+  var lid=Math.max(cur.lid,blid)
+
+  eye(lx,ey,ew,eh,lid,finalLox,finalLoy,cur.ps,cur.rgb,cur.glow,cur.brow,'L')
+  eye(rx,ey,ew,eh,lid,finalRox,finalRoy,cur.ps,cur.rgb,cur.glow,cur.brow,'R')
+
   fctx.fillStyle=rgba(cur.rgb,.28)
   fctx.beginPath();fctx.arc(FW/2-9,ey+eh*.85,2.8,0,Math.PI*2);fctx.fill()
   fctx.beginPath();fctx.arc(FW/2+9,ey+eh*.85,2.8,0,Math.PI*2);fctx.fill()
 
-  // mouth
   mouth(FW/2, ey+eh*1.55, ew*1.75, cur.mouth, talkT)
 
-  // heart pupils on love
   if(curEmoName==='love'){
     fctx.save()
     fctx.globalAlpha=.55
-    ;[[lx,ey],[rx,ey]].forEach(([hx,hy])=>{
-      const s=ew*.18
+    ;[[lx,ey],[rx,ey]].forEach(function(h){
+      var s=ew*.18
       fctx.fillStyle=rgba(cur.rgb,1)
-      fctx.font=`${s*2.2}px serif`
+      fctx.font=(s*2.2)+'px serif'
       fctx.textAlign='center'; fctx.textBaseline='middle'
-      fctx.fillText('♥',hx,hy)
+      fctx.fillText('\u2665',h[0],h[1])
     })
     fctx.restore()
   }
 
-  // face border glow
-  fctx.strokeStyle=rgba(cur.glow,.07); fctx.lineWidth=1.5
+  var borderAlpha = window._ambientBreathAlpha || 0.07
+  fctx.strokeStyle=rgba(cur.glow, borderAlpha); fctx.lineWidth=1.5
   fctx.beginPath()
   fctx.roundRect(FW*.03,FH*.04,FW*.94,FH*.92,20)
   fctx.stroke()
+
+  if(ambientOn && window._ambientGlowMul){
+    var bPulse = 0.02 + Math.sin(ambientBreath * 1.2) * 0.015 * window._ambientGlowMul
+    fctx.strokeStyle=rgba(cur.glow, bPulse); fctx.lineWidth=6
+    fctx.beginPath()
+    fctx.roundRect(FW*.02,FH*.02,FW*.96,FH*.96,28)
+    fctx.stroke()
+  }
 }
 requestAnimationFrame(loop)
 
 // ════════════════════════════════════════════════
-//  CHAT
+//  HELPERS
 // ════════════════════════════════════════════════
-const logEl   =document.getElementById('log')
-const inputEl =document.getElementById('prompt')
-const sendBtnEl=document.getElementById('send-btn')
-const statusEl =document.getElementById('status')
-
 function addMsg(cls,html){
-  const d=document.createElement('div')
+  var d=document.createElement('div')
   d.className='entry '+cls; d.innerHTML=html
   logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight
   return d
@@ -562,53 +982,782 @@ function addMsg(cls,html){
 
 function detectEmotion(t){
   t=t.toLowerCase()
-  if(/\b(love|adore|heart|♥)\b/.test(t))                                             return 'love'
-  if(/\b(happy|great|wonderful|amazing|awesome|yay|fantastic|haha|😊|😄|🎉)\b/.test(t)) return 'happy'
-  if(/\b(sad|sorry|unfortunate|bad|awful|miss|lonely|😢|😞)\b/.test(t))               return 'sad'
-  if(/\b(angry|furious|hate|terrible|ridiculous|😠|😡)\b/.test(t))                    return 'angry'
-  if(/\b(wow|whoa|really|incredible|unbelievable|surprise|oh my|😮|😲)\b/.test(t))    return 'surprised'
+  if(/\b(love|adore|heart)\b/.test(t))                                             return 'love'
+  if(/\b(happy|great|wonderful|amazing|awesome|yay|fantastic|haha)\b/.test(t))      return 'happy'
+  if(/\b(sad|sorry|unfortunate|bad|awful|miss|lonely)\b/.test(t))                   return 'sad'
+  if(/\b(angry|furious|hate|terrible|ridiculous)\b/.test(t))                        return 'angry'
+  if(/\b(wow|whoa|really|incredible|unbelievable|surprise|oh my)\b/.test(t))        return 'surprised'
   return 'neutral'
 }
 
-async function send(){
-  const text=inputEl.value.trim()
+// ════════════════════════════════════════════════
+//  YOUTUBE PLAYER ENGINE (opens in new tab)
+// ════════════════════════════════════════════════
+var ytBanner = document.getElementById('ytBanner')
+
+var ytOverlay = document.getElementById('ytOverlay');
+var ytPlayer = document.getElementById('ytPlayer');
+var ytTitle = document.getElementById('ytTitle');
+var ytClose = document.getElementById('ytClose');
+var ytPlaying = false;
+
+function showYouTube(videoId, title){
+  ytPlaying = true;
+  ytOverlay.style.display = 'flex';
+  ytPlayer.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+  ytTitle.textContent = '\u266B ' + (title || 'Now Playing');
+  setEmotion('happy');
+  statusEl.textContent = '[ \u266B NOW PLAYING ]';
+  addMsg('bot', '&gt; \u266B Playing: ' + (title || 'Now Playing'));
+  console.log('[CRIMSON] YouTube embedded:', videoId, ytTitle.textContent);
+}
+
+function hideYouTube(){
+  ytPlaying = false;
+  ytOverlay.style.display = 'none';
+  ytPlayer.src = '';
+  ytTitle.textContent = '';
+  setEmotion('neutral');
+  statusEl.textContent = '[ IDLE ]';
+  addMsg('bot', '&gt; \u25A0 Music stopped.');
+  console.log('[CRIMSON] YouTube stopped');
+}
+
+// Check if AI reply contains a [PLAY:...] or [STOP] command
+
+function searchAndPlayYouTube(query){
+  statusEl.textContent = '[ \uD83D\uDD0D SEARCHING YOUTUBE... ]';
+  addMsg('think', '&gt; Searching YouTube for "' + query + '"...');
+
+  fetch('/api/youtube-search?q=' + encodeURIComponent(query))
+    .then(function(res){ return res.json() })
+    .then(function(data){
+      if(data.error){
+        addMsg('err', '&gt; Could not find that song: ' + data.error);
+        statusEl.textContent = '[ SEARCH FAILED ]';
+        setEmotion('sad', 3000);
+        return;
+      }
+      showYouTube(data.videoId, query);
+    })
+    .catch(function(e){
+      addMsg('err', '&gt; YouTube search error: ' + e.message);
+      statusEl.textContent = '[ SEARCH ERROR ]';
+      setEmotion('sad', 3000);
+    });
+}
+function handleMediaCommands(reply){
+  // Check for [PLAY:something]
+  var playMatch = reply.match(/\[PLAY:([^\]]+)\]/)
+  if(playMatch){
+    var songQuery = playMatch[1].trim()
+    // Remove the [PLAY:...] tag from the display text
+    var cleanReply = reply.replace(/\[PLAY:[^\]]+\]/, '').trim()
+    if(cleanReply) addMsg('bot', '&gt; CRIMSON: ' + cleanReply)
+    searchAndPlayYouTube(songQuery)
+    return true
+  }
+  // Check for [STOP]
+  if(/\[STOP\]/.test(reply)){
+    var cleanReply2 = reply.replace(/\[STOP\]/, '').trim()
+    if(cleanReply2) addMsg('bot', '&gt; CRIMSON: ' + cleanReply2)
+    if(ytPlaying) hideYouTube()
+    else addMsg('bot', '&gt; Nothing is playing right now!')
+    return true
+  }
+  return false
+}
+
+// ════════════════════════════════════════════════
+//  VOICE OUTPUT (Text-to-Speech)
+// ════════════════════════════════════════════════
+var voiceEnabled = false
+var currentUtterance = null
+var cachedVoices = []
+var voiceReady = false
+var speechResumeInterval = null
+
+// Chrome on Linux has a bug where speechSynthesis pauses silently.
+// This workaround periodically calls resume() to keep it going.
+function startSpeechWatchdog(){
+  if(speechResumeInterval) clearInterval(speechResumeInterval)
+  speechResumeInterval = setInterval(function(){
+    if(speechSynthesis.speaking && !speechSynthesis.paused){
+      speechSynthesis.pause()
+      speechSynthesis.resume()
+    }
+    if(!speechSynthesis.speaking){
+      clearInterval(speechResumeInterval)
+      speechResumeInterval = null
+    }
+  }, 5000)
+}
+
+// Pre-load voices (Chrome loads them asynchronously)
+function loadVoices(){
+  cachedVoices = speechSynthesis.getVoices()
+  if(cachedVoices.length > 0) voiceReady = true
+  console.log('[CRIMSON] Voices loaded:', cachedVoices.length)
+}
+
+if('speechSynthesis' in window){
+  loadVoices()
+  speechSynthesis.onvoiceschanged = loadVoices
+  // Force-load voices after a delay (Chrome sometimes needs this)
+  setTimeout(loadVoices, 500)
+  setTimeout(loadVoices, 1500)
+}
+
+voiceToggleBtn.addEventListener('click', function(){
+  voiceEnabled = !voiceEnabled
+  voiceToggleBtn.textContent = voiceEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07'
+  voiceToggleBtn.classList.toggle('active', voiceEnabled)
+  voiceToggleBtn.title = voiceEnabled ? 'CRIMSON voice ON (click to mute)' : 'CRIMSON voice OFF (click to enable)'
+  if(voiceEnabled){
+    // Speak a test phrase to warm up the synth (user gesture required)
+    speechSynthesis.cancel()
+    var warmup = new SpeechSynthesisUtterance('CRIMSON voice activated')
+    warmup.volume = 0.8
+    warmup.rate = 1.05
+    warmup.pitch = 1.1
+    var v = cachedVoices.find(function(v){ return v.lang.startsWith('en') }) || cachedVoices[0]
+    if(v) warmup.voice = v
+    warmup.onstart = function(){ talking = true }
+    warmup.onend = function(){ talking = false }
+    warmup.onerror = function(e){ console.warn('[CRIMSON] Voice warmup error:', e.error) }
+    speechSynthesis.speak(warmup)
+    startSpeechWatchdog()
+    addMsg('bot','&gt; \uD83D\uDD0A VOICE OUTPUT ENABLED')
+  } else {
+    speechSynthesis.cancel()
+    if(speechResumeInterval){ clearInterval(speechResumeInterval); speechResumeInterval = null }
+    talking = false
+    currentUtterance = null
+    addMsg('bot','&gt; \uD83D\uDD07 VOICE OUTPUT MUTED')
+  }
+})
+
+function speakText(text){
+  if(!voiceEnabled || !('speechSynthesis' in window)) return
+  console.log('[CRIMSON] Speaking:', text.substring(0, 50) + '...')
+
+  // Always cancel before speaking (prevents queue buildup)
+  speechSynthesis.cancel()
+
+  // Small delay after cancel to let Chrome reset
+  setTimeout(function(){
+    var utter = new SpeechSynthesisUtterance(text)
+    currentUtterance = utter
+
+    // Refresh voices if needed
+    if(cachedVoices.length === 0) loadVoices()
+
+    var preferred = cachedVoices.find(function(v){
+      return /google uk english male|daniel|male/i.test(v.name)
+    }) || cachedVoices.find(function(v){ return v.lang.startsWith('en') }) || cachedVoices[0]
+    if(preferred) utter.voice = preferred
+
+    utter.rate = 1.05
+    utter.pitch = 1.1
+    utter.volume = 1.0
+
+    utter.onstart = function(){
+      console.log('[CRIMSON] TTS started')
+      talking = true
+    }
+    utter.onend = function(){
+      console.log('[CRIMSON] TTS ended')
+      talking = false
+      currentUtterance = null
+      if(speechResumeInterval){ clearInterval(speechResumeInterval); speechResumeInterval = null }
+    }
+    utter.onerror = function(e){
+      console.warn('[CRIMSON] TTS error:', e.error)
+      talking = false
+      currentUtterance = null
+      if(speechResumeInterval){ clearInterval(speechResumeInterval); speechResumeInterval = null }
+    }
+    utter.onboundary = function(e){ if(e.name === 'word') talkT += 0.5 }
+
+    speechSynthesis.speak(utter)
+    startSpeechWatchdog()
+  }, 100)
+}
+
+// ════════════════════════════════════════════════
+//  VOICE INPUT (Speech-to-Text)
+// ════════════════════════════════════════════════
+var recognition = null
+var isRecording = false
+
+var SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition
+if(SpeechRecog){
+  console.log('[CRIMSON] SpeechRecognition API available')
+  recognition = new SpeechRecog()
+  recognition.continuous = false
+  recognition.interimResults = true
+  recognition.lang = 'en-US'
+
+  recognition.onstart = function(){
+    console.log('[CRIMSON] Mic recording started')
+    isRecording = true
+    micBtn.classList.add('recording')
+    micBtn.textContent = '\u23F9'
+    statusEl.textContent = '[ \uD83C\uDFA4 LISTENING... ]'
+    inputEl.placeholder = 'Listening...'
+  }
+
+  recognition.onresult = function(e){
+    var interim = '', final2 = ''
+    for(var i = e.resultIndex; i < e.results.length; i++){
+      var transcript = e.results[i][0].transcript
+      if(e.results[i].isFinal) final2 += transcript
+      else interim += transcript
+    }
+    inputEl.value = final2 || interim
+    console.log('[CRIMSON] Heard:', inputEl.value)
+  }
+
+  recognition.onend = function(){
+    console.log('[CRIMSON] Mic recording ended')
+    isRecording = false
+    micBtn.classList.remove('recording')
+    micBtn.textContent = '\uD83C\uDFA4'
+    inputEl.placeholder = 'Ask CRIMSON anything...'
+    var text = inputEl.value.trim()
+    if(text){
+      statusEl.textContent = '[ VOICE CAPTURED ]'
+      setTimeout(function(){ send() }, 400)
+    } else {
+      statusEl.textContent = '[ NO SPEECH DETECTED ]'
+    }
+  }
+
+  recognition.onerror = function(e){
+    console.warn('[CRIMSON] Mic error:', e.error)
+    isRecording = false
+    micBtn.classList.remove('recording')
+    micBtn.textContent = '\uD83C\uDFA4'
+    inputEl.placeholder = 'Ask CRIMSON anything...'
+    if(e.error === 'no-speech'){
+      statusEl.textContent = '[ NO SPEECH DETECTED ]'
+    } else if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+      addMsg('err','&gt; MIC ACCESS DENIED — allow mic in browser settings or use Chrome on localhost')
+      statusEl.textContent = '[ MIC BLOCKED ]'
+    } else if(e.error === 'network'){
+      addMsg('err','&gt; MIC NETWORK ERROR — Chrome needs internet for speech recognition')
+      statusEl.textContent = '[ MIC NETWORK ERROR ]'
+    } else if(e.error === 'aborted'){
+      statusEl.textContent = '[ MIC STOPPED ]'
+    } else {
+      addMsg('err','&gt; MIC ERROR: '+e.error)
+      statusEl.textContent = '[ MIC ERROR: '+e.error+' ]'
+    }
+  }
+
+  micBtn.addEventListener('click', function(){
+    console.log('[CRIMSON] Mic button clicked, isRecording:', isRecording)
+    if(isRecording){
+      recognition.stop()
+    } else {
+      // Stop any current speech output first
+      if(currentUtterance){ speechSynthesis.cancel(); talking = false; currentUtterance = null }
+      inputEl.value = ''
+      try {
+        recognition.start()
+      } catch(e) {
+        console.warn('[CRIMSON] Mic start error:', e.message)
+        // If already started, stop and restart
+        recognition.stop()
+        setTimeout(function(){
+          inputEl.value = ''
+          recognition.start()
+        }, 300)
+      }
+    }
+  })
+} else {
+  console.warn('[CRIMSON] SpeechRecognition NOT available — use Chrome')
+  micBtn.style.opacity = '0.3'
+  micBtn.style.cursor = 'not-allowed'
+  micBtn.title = 'Speech recognition not supported (use Chrome)'
+  micBtn.addEventListener('click', function(){
+    addMsg('err','&gt; Voice input requires Google Chrome browser')
+  })
+}
+
+// ════════════════════════════════════════════════
+//  CHAT
+// ════════════════════════════════════════════════
+function send(){
+  var text=inputEl.value.trim()
   if(!text||sendBtnEl.disabled)return
+
+  // Close dashboard if open when user chats
+  if(dashOn) hideDashboard()
+
+  // Quick-stop shortcut: if music is playing and user says stop
+  var lowerText = text.toLowerCase()
+  if(ytPlaying && /^(stop|stop it|stop the music|stop playing|close|back|enough|shut up)$/i.test(lowerText)){
+    inputEl.value=''
+    addMsg('you','&gt; '+text)
+    hideYouTube()
+    return
+  }
+
+  // Clear memory command
+  if(/^(clear memory|forget everything|reset memory|wipe memory)$/i.test(lowerText)){
+    inputEl.value=''
+    addMsg('you','&gt; '+text)
+    clearMemory()
+    return
+  }
+
+  // Save user message to memory
+  addToMemory('you', text)
+
   inputEl.value=''; sendBtnEl.disabled=true
+  micBtn.disabled=true
   statusEl.textContent='[ TRANSMITTING... ]'
   addMsg('you','&gt; '+text)
   setEmotion('thinking')
-  const te=addMsg('think','&gt; ...')
-  try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:text})})
-    const j=await res.json()
+  talking=true
+  var te=addMsg('think','&gt; thinking...')
+
+  var startTime = Date.now()
+  var thinkTimer = setInterval(function(){
+    var elapsed = ((Date.now()-startTime)/1000)|0
+    var dots = '.'.repeat((elapsed % 3)+1)
+    te.innerHTML = '<span style="opacity:.6">&gt; thinking'+dots+' ('+elapsed+'s)</span>'
+    statusEl.textContent = '[ THINKING \u00B7 '+elapsed+'s ]'
+  }, 500)
+
+  var controller = new AbortController()
+  var abortTimeout = setTimeout(function(){controller.abort()}, 120000)
+
+  fetch('/api/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt:text}),
+    signal:controller.signal
+  }).then(function(res){ return res.json() }).then(function(j){
+    clearTimeout(abortTimeout)
+    clearInterval(thinkTimer)
     te.remove()
+    talking=false
     if(j.error){
       addMsg('err','&gt; ERROR: '+j.error)
-      statusEl.textContent='[ ERROR ] — '+j.error.substring(0,70)
+      statusEl.textContent='[ ERROR ]'
       setEmotion('sad',3500)
     } else {
-      addMsg('bot','&gt; LETLET: '+j.reply)
-      statusEl.textContent='[ OK ]'
-      talking=true
-      const emo=detectEmotion(j.reply)
-      setEmotion(emo,5000)
-      setTimeout(()=>{talking=false},3200)
+      var elapsed = ((Date.now()-startTime)/1000).toFixed(1)
+      var backend = j.backend ? j.backend.toUpperCase() : ''
+
+      // Check for media commands ([PLAY:...] or [STOP])
+      if(handleMediaCommands(j.reply)){
+        addToMemory('crimson', j.reply)
+        statusEl.textContent='[ OK \u00B7 '+backend+' \u00B7 '+elapsed+'s ]'
+      } else {
+        addMsg('bot','&gt; CRIMSON: '+j.reply)
+        addToMemory('crimson', j.reply)
+        statusEl.textContent='[ OK \u00B7 '+backend+' \u00B7 '+elapsed+'s ]'
+        var emo=detectEmotion(j.reply)
+        setEmotion(emo,5000)
+        if(voiceEnabled){
+          speakText(j.reply)
+        } else {
+          talking=true
+          setTimeout(function(){talking=false},3200)
+        }
+      }
     }
-  }catch(e){
+    sendBtnEl.disabled=false; micBtn.disabled=false; inputEl.focus()
+  }).catch(function(e){
+    clearTimeout(abortTimeout)
+    clearInterval(thinkTimer)
     te.remove()
-    addMsg('err','&gt; NETWORK ERROR: '+e.message)
-    statusEl.textContent='[ FAIL ]'
+    talking=false
+    if(e.name==='AbortError'){
+      addMsg('err','&gt; TIMEOUT - response took too long (120s)')
+      statusEl.textContent='[ TIMEOUT ]'
+    } else {
+      addMsg('err','&gt; NETWORK ERROR: '+e.message)
+      statusEl.textContent='[ FAIL ]'
+    }
     setEmotion('sad',3000)
-  }
-  sendBtnEl.disabled=false; inputEl.focus()
+    sendBtnEl.disabled=false; micBtn.disabled=false; inputEl.focus()
+  })
 }
 sendBtnEl.addEventListener('click',send)
-inputEl.addEventListener('keydown',e=>{if(e.key==='Enter')send()})
+inputEl.addEventListener('keydown',function(e){if(e.key==='Enter')send()})
+
+// ════════════════════════════════════════════════
+//  AMBIENT MODE ENGINE
+// ════════════════════════════════════════════════
+var ambientOn = false
+var ambientLookX = 0, ambientLookY = 0
+var ambientLookCurX = 0, ambientLookCurY = 0
+var ambientNextLook = 0
+var ambientBreath = 0
+var ambientNextMicro = 8000
+var ambientTimePhase = 'day'
+
+var TIME_PROFILES = {
+  morning: { energy: 0.7, label:'GOOD MORNING',  glowMul:0.9,  microChance:0.3, statusMsg:'[ AMBIENT \u00B7 MORNING ]' },
+  day:     { energy: 1.0, label:'DAYTIME',        glowMul:1.0,  microChance:0.5, statusMsg:'[ AMBIENT \u00B7 ACTIVE ]' },
+  evening: { energy: 0.6, label:'EVENING',        glowMul:0.7,  microChance:0.25,statusMsg:'[ AMBIENT \u00B7 EVENING ]' },
+  night:   { energy: 0.3, label:'SLEEPY',         glowMul:0.45, microChance:0.15,statusMsg:'[ AMBIENT \u00B7 NIGHT ]' },
+}
+
+var MICRO_EXPRESSIONS = [
+  { emo:'happy',     dur:1800, weight:3 },
+  { emo:'surprised', dur:1200, weight:1 },
+  { emo:'thinking',  dur:2200, weight:2 },
+  { emo:'love',      dur:1500, weight:1 },
+  { emo:'sad',       dur:1000, weight:0.5 },
+]
+
+function getTimePhase(){
+  var h = new Date().getHours()
+  if(h >= 6  && h < 11) return 'morning'
+  if(h >= 11 && h < 18) return 'day'
+  if(h >= 18 && h < 22) return 'evening'
+  return 'night'
+}
+
+function pickMicroExpression(){
+  var totalW = MICRO_EXPRESSIONS.reduce(function(s,m){return s+m.weight},0)
+  var r = Math.random() * totalW
+  for(var i=0;i<MICRO_EXPRESSIONS.length;i++){
+    r -= MICRO_EXPRESSIONS[i].weight
+    if(r <= 0) return MICRO_EXPRESSIONS[i]
+  }
+  return MICRO_EXPRESSIONS[0]
+}
+
+function ambientTick(dt){
+  if(!ambientOn) return
+
+  var phase = getTimePhase()
+  var prof = TIME_PROFILES[phase]
+
+  if(phase !== ambientTimePhase){
+    ambientTimePhase = phase
+    statusEl.textContent = prof.statusMsg
+    document.getElementById('sysStatus').textContent = 'AMBIENT \u00B7 ' + phase.toUpperCase()
+    addMsg('bot', '&gt; '+prof.label)
+  }
+
+  ambientBreath += dt * (0.6 + prof.energy * 0.4)
+  var breathAlpha = 0.04 + Math.sin(ambientBreath) * 0.03 * prof.glowMul
+  window._ambientBreathAlpha = breathAlpha
+  window._ambientGlowMul = prof.glowMul
+
+  ambientNextLook -= dt * 1000
+  if(ambientNextLook <= 0){
+    var range = 0.15 * prof.energy
+    ambientLookX = (Math.random() - 0.5) * 2 * range
+    ambientLookY = (Math.random() - 0.5) * 2 * range * 0.6
+    if(Math.random() < 0.3){ ambientLookX = 0; ambientLookY = 0 }
+    ambientNextLook = 1500 + Math.random() * 3000 / prof.energy
+  }
+  var lookSpeed = dt * (1.2 + prof.energy * 0.8)
+  ambientLookCurX += (ambientLookX - ambientLookCurX) * lookSpeed
+  ambientLookCurY += (ambientLookY - ambientLookCurY) * lookSpeed
+
+  ambientNextMicro -= dt * 1000
+  if(ambientNextMicro <= 0){
+    if(Math.random() < prof.microChance){
+      var micro = pickMicroExpression()
+      setEmotion(micro.emo, micro.dur)
+    }
+    ambientNextMicro = 5000 + Math.random() * 10000 / prof.energy
+  }
+
+  if(phase === 'night'){
+    tgt.lid = Math.max(tgt.lid, 0.2 + Math.sin(ambientBreath * 0.3) * 0.1)
+  }
+}
+
+function ambientPupilOffset(ew){
+  if(!ambientOn) return [0, 0]
+  return [ambientLookCurX * ew, ambientLookCurY * ew]
+}
+
+// ════════════════════════════════════════════════
+//  CONVERSATION MEMORY (localStorage)
+// ════════════════════════════════════════════════
+var chatMemory = []
+var MEMORY_KEY = 'crimson_chat_history'
+
+function loadMemory(){
+  try {
+    var saved = localStorage.getItem(MEMORY_KEY)
+    if(saved) chatMemory = JSON.parse(saved)
+  } catch(e){ chatMemory = [] }
+  console.log('[CRIMSON] Memory loaded:', chatMemory.length, 'messages')
+}
+
+function saveMemory(){
+  try {
+    // Keep last 40 messages in localStorage
+    if(chatMemory.length > 40) chatMemory = chatMemory.slice(-40)
+    localStorage.setItem(MEMORY_KEY, JSON.stringify(chatMemory))
+  } catch(e){ console.warn('[CRIMSON] Memory save failed:', e) }
+}
+
+function addToMemory(role, text){
+  chatMemory.push({role: role, text: text, ts: Date.now()})
+  saveMemory()
+}
+
+function clearMemory(){
+  chatMemory = []
+  localStorage.removeItem(MEMORY_KEY)
+  fetch('/api/history', {method:'DELETE'}).catch(function(){})
+  addMsg('bot', '&gt; \uD83E\uDDE0 Memory cleared! Fresh start.')
+}
+
+loadMemory()
+
+// Memory is stored in localStorage and synced to server naturally via chat.
+// No need to replay old messages on boot.
+
+// ════════════════════════════════════════════════
+//  SMART DASHBOARD
+// ════════════════════════════════════════════════
+var dashOverlay = document.getElementById('dashOverlay')
+var dashClose   = document.getElementById('dashClose')
+var dashOn      = false
+var dashUpdateInterval = null
+
+var DASH_QUOTES = [
+  "Hey there! I'm ready whenever you are.",
+  "Ask me anything — I don't bite!",
+  "Want to hear some music? Just say the word!",
+  "I remember everything we talked about.",
+  "Fun fact: I never sleep. I just blink sometimes.",
+  "Try saying 'play me a song' — it's magic!",
+  "I'm powered by Groq — blazing fast!",
+  "Every conversation makes me smarter.",
+  "What's on your mind today?",
+  "I'm your friendly neighborhood AI robot!",
+]
+
+function dashGetGreeting(){
+  var h = new Date().getHours()
+  if(h >= 5 && h < 12) return 'Good Morning!'
+  if(h >= 12 && h < 17) return 'Good Afternoon!'
+  if(h >= 17 && h < 21) return 'Good Evening!'
+  return 'Night Owl Mode'
+}
+
+function dashFormatDate(){
+  var d = new Date()
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear()
+}
+
+function dashUpdateTime(){
+  var now = new Date()
+  var h = now.getHours(), m = now.getMinutes()
+  var ampm = h >= 12 ? 'PM' : 'AM'
+  var h12 = h % 12 || 12
+  document.getElementById('dashTime').textContent = (h12 < 10 ? '0' : '') + h12 + ':' + (m < 10 ? '0' : '') + m
+  document.getElementById('dashTimeSub').textContent = ampm + ' \u00B7 ' + now.toLocaleDateString('en-US', {timeZoneName:'short'}).split(', ').pop()
+}
+
+function dashUpdateWeather(){
+  fetch('/api/weather')
+    .then(function(r){ return r.json() })
+    .then(function(w){
+      if(w.error){
+        document.getElementById('dashWeather').innerHTML = '<span style="font-size:14px">No API key</span>'
+        document.getElementById('dashWeatherSub').textContent = 'Add WEATHER_API_KEY to .env'
+        return
+      }
+      var iconUrl = 'https://openweathermap.org/img/wn/' + w.icon + '@2x.png'
+      document.getElementById('dashWeather').innerHTML =
+        '<img class="wx-icon" src="' + iconUrl + '" alt="weather"/>' +
+        w.temp + '\u00B0C'
+      document.getElementById('dashWeatherSub').textContent =
+        w.description + ' \u00B7 ' + w.city + ' \u00B7 humidity ' + w.humidity + '%'
+    })
+    .catch(function(){
+      document.getElementById('dashWeather').innerHTML = '<span style="font-size:14px">Offline</span>'
+      document.getElementById('dashWeatherSub').textContent = 'Could not fetch weather'
+    })
+}
+
+function dashUpdateMemory(){
+  var count = chatMemory.length
+  document.getElementById('dashMemory').textContent = count + ' message' + (count !== 1 ? 's' : '')
+  if(count > 0){
+    var last = chatMemory[chatMemory.length - 1]
+    var ago = Math.round((Date.now() - last.ts) / 60000)
+    if(ago < 1) document.getElementById('dashMemorySub').textContent = 'last chat: just now'
+    else if(ago < 60) document.getElementById('dashMemorySub').textContent = 'last chat: ' + ago + 'min ago'
+    else document.getElementById('dashMemorySub').textContent = 'last chat: ' + Math.round(ago/60) + 'h ago'
+  }
+}
+
+function dashUpdateSystem(){
+  fetch('/api/status')
+    .then(function(r){ return r.json() })
+    .then(function(s){
+      document.getElementById('dashSystem').textContent = s.backend ? s.backend.toUpperCase() : 'OFFLINE'
+      document.getElementById('dashSystemSub').textContent = s.model ? s.model : 'no model'
+    })
+    .catch(function(){
+      document.getElementById('dashSystem').textContent = 'OFFLINE'
+      document.getElementById('dashSystemSub').textContent = 'server unreachable'
+    })
+}
+
+function dashUpdateQuote(){
+  document.getElementById('dashQuote').textContent =
+    '"' + DASH_QUOTES[Math.floor(Math.random() * DASH_QUOTES.length)] + '"'
+}
+
+function dashUpdate(){
+  document.getElementById('dashGreeting').textContent = dashGetGreeting()
+  document.getElementById('dashDate').textContent = dashFormatDate()
+  dashUpdateTime()
+  dashUpdateMemory()
+  dashUpdateQuote()
+}
+
+function showDashboard(){
+  if(dashOn) return
+  dashOn = true
+  dashOverlay.classList.add('active')
+  document.getElementById('faceCanvas').style.opacity = '0'
+  document.getElementById('emoLabel').style.display = 'none'
+  setEmotion('happy')
+
+  dashUpdate()
+  dashUpdateWeather()
+  dashUpdateSystem()
+
+  dashUpdateInterval = setInterval(function(){
+    dashUpdateTime()
+    dashUpdateMemory()
+  }, 10000)
+
+  statusEl.textContent = '[ DASHBOARD ]'
+  addMsg('bot', '&gt; \uD83D\uDCCA Dashboard activated')
+}
+
+function hideDashboard(){
+  if(!dashOn) return
+  dashOn = false
+  dashOverlay.classList.remove('active')
+  document.getElementById('faceCanvas').style.opacity = '1'
+  document.getElementById('emoLabel').style.display = 'block'
+  setEmotion('neutral')
+  if(dashUpdateInterval){ clearInterval(dashUpdateInterval); dashUpdateInterval = null }
+  statusEl.textContent = '[ IDLE ]'
+}
+
+dashClose.addEventListener('click', hideDashboard)
+
+// ════════════════════════════════════════════════
+//  SIMULATION PANEL
+// ════════════════════════════════════════════════
+;(function initSimPanel(){
+  var panel   = document.getElementById('simPanel')
+  var toggle  = document.getElementById('simToggle')
+  var talkBtn = document.getElementById('talkToggle')
+  var ambBtn  = document.getElementById('ambientToggle')
+  var dashBtn = document.getElementById('dashToggle')
+  var emoBtns = panel.querySelectorAll('.sim-btn[data-emo]')
+
+  toggle.addEventListener('click',function(){
+    panel.classList.toggle('collapsed')
+    toggle.textContent = panel.classList.contains('collapsed') ? '\u25C8 SIM \u25B8' : '\u25C8 SIM'
+  })
+
+  emoBtns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      emoBtns.forEach(function(b){b.classList.remove('active')})
+      btn.classList.add('active')
+      if(ambientOn){ ambientOn=false; ambBtn.classList.remove('active'); ambBtn.textContent='\u25C8 AMBIENT' }
+      setEmotion(btn.dataset.emo)
+    })
+  })
+
+  var talkSim = false
+  talkBtn.addEventListener('click',function(){
+    talkSim = !talkSim
+    talking = talkSim
+    talkBtn.classList.toggle('active', talkSim)
+    talkBtn.textContent = talkSim ? '\u25A0 STOP TALK' : '\u25C8 TALK'
+    if(!talkSim) talkT = 0
+  })
+
+  ambBtn.addEventListener('click',function(){
+    ambientOn = !ambientOn
+    ambBtn.classList.toggle('active', ambientOn)
+    ambBtn.textContent = ambientOn ? '\u25A0 STOP AMBIENT' : '\u25C8 AMBIENT'
+    if(ambientOn){
+      emoBtns.forEach(function(b){b.classList.remove('active')})
+      ambientNextLook = 0
+      ambientNextMicro = 2000 + Math.random() * 3000
+      ambientTimePhase = ''
+      var prof = TIME_PROFILES[getTimePhase()]
+      statusEl.textContent = prof.statusMsg
+      setEmotion('neutral')
+      addMsg('bot','&gt; AMBIENT MODE ACTIVATED')
+    } else {
+      setEmotion('neutral')
+      statusEl.textContent = '[ IDLE ]'
+      document.getElementById('sysStatus').textContent = 'SYSTEM ONLINE'
+      window._ambientBreathAlpha = 0
+      window._ambientGlowMul = 1
+    }
+  })
+
+  dashBtn.addEventListener('click',function(){
+    if(dashOn){
+      hideDashboard()
+      dashBtn.classList.remove('active')
+      dashBtn.textContent = '\u25C8 DASHBOARD'
+    } else {
+      if(ambientOn){ ambientOn=false; ambBtn.classList.remove('active'); ambBtn.textContent='\u25C8 AMBIENT' }
+      showDashboard()
+      dashBtn.classList.add('active')
+      dashBtn.textContent = '\u25A0 CLOSE DASH'
+    }
+  })
+})()
 
 // ── Boot emotion demo ─────────────────────────────
 ;(function demo(){
-  const seq=[[400,'surprised'],[1600,'happy'],[3000,'sad'],[4400,'angry'],[5800,'love'],[7200,'thinking'],[8600,'neutral']]
-  seq.forEach(([t,e])=>setTimeout(()=>setEmotion(e),t))
+  var seq=[[400,'surprised'],[1600,'happy'],[3000,'sad'],[4400,'angry'],[5800,'love'],[7200,'thinking'],[8600,'neutral']]
+  seq.forEach(function(s){setTimeout(function(){setEmotion(s[1])},s[0])})
+})()
+
+// ── Check AI backend on boot ──────────────────────
+;(function checkBackend(){
+  fetch('/api/status').then(function(res){return res.json()}).then(function(j){
+    var model = j.model ? j.model.toUpperCase() : ''
+    if(j.backend === 'groq'){
+      addMsg('bot','&gt; AI BACKEND: GROQ (fast) \u00B7 '+model)
+      statusEl.textContent = '[ GROQ \u00B7 '+model+' ]'
+    } else if(j.backend === 'ollama'){
+      addMsg('bot','&gt; AI BACKEND: OLLAMA (offline) \u00B7 '+model)
+      statusEl.textContent = '[ OLLAMA \u00B7 '+model+' ]'
+    } else if(j.backend === 'openai'){
+      addMsg('bot','&gt; AI BACKEND: OPENAI (online)')
+      statusEl.textContent = '[ OPENAI ]'
+    } else {
+      addMsg('err','&gt; NO AI BACKEND')
+      statusEl.textContent = '[ NO AI BACKEND ]'
+    }
+  }).catch(function(){
+    addMsg('err','&gt; Could not reach server')
+  })
 })()
 </script>
 </body>

@@ -28,7 +28,13 @@ pip install -r requirements.txt
 python app.py
 ```
 
-4. Open a browser on your Raspberry Pi and visit `http://localhost:5000` or access it from another device using the Pi's IP address.
+-4. Open a browser on your Raspberry Pi and visit `http://localhost:5000` or access it from another device using the Pi's IP address.
+
+Security
+\- If you accidentally leak an API key (for example, pasting it into a public chat or committing it to a repo), revoke/rotate it immediately from your OpenAI dashboard. Do NOT paste or share your secret key in chats or public issue trackers.
+
+Configuration
+- Keep secrets out of version control: create a local `.env` with `OPENAI_API_KEY=your_key_here` or set the environment variable in your systemd/service configuration. Add `.env` to `.gitignore` (this project includes a `.gitignore` entry already).
 
 Notes
 - The backend expects OpenAI-compatible Chat Completions. Change the endpoint/payload if using a different API provider.
