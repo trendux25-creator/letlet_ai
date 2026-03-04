@@ -27,10 +27,12 @@ body::after{
 }
 
 .scene{
-  position:relative;z-index:1;
+  position:fixed;z-index:1;
   width:100vw;height:100vh;
+  top:0;left:0;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
+  overflow:hidden;
 }
 
 .topbar{
@@ -63,35 +65,32 @@ body::after{
 
 #faceCanvas{
   display:block;
-  width:min(92vw,900px);
-  height:min(58vw,580px);
-  position:relative;z-index:2;
+  width:100vw;
+  height:100vh;
+  position:fixed;
+  top:0;left:0;
+  z-index:2;
   filter:drop-shadow(0 0 40px rgba(0,255,231,0.08));
 }
 
 #emoLabel{
-  font-family:'Share Tech Mono',monospace;
-  font-size:clamp(10px,1vw,12px);
-  letter-spacing:.35em;
-  color:rgba(0,255,231,0.35);
-  text-transform:uppercase;
-  margin-top:6px;
-  height:16px;
-  transition:color .5s;
+  display:none !important;
 }
 
 .chat{
   position:fixed;bottom:0;left:0;right:0;
   z-index:100;
-  padding:0 clamp(16px,5vw,80px) 22px;
-  background:linear-gradient(0deg,rgba(3,8,15,0.97) 60%,transparent);
+  padding:0 clamp(10px,3vw,40px) 12px;
+  background:linear-gradient(0deg,rgba(3,8,15,0.85) 40%,transparent);
+  pointer-events:none;
 }
+.chat > *{ pointer-events:auto; }
 
 .log{
-  max-width:860px;margin:0 auto 10px;
-  height:clamp(60px,12vh,110px);
+  max-width:700px;margin:0 auto 6px;
+  height:clamp(40px,8vh,70px);
   overflow-y:auto;
-  padding:8px 0;
+  padding:4px 0;
   scrollbar-width:none;
 }
 .log::-webkit-scrollbar{display:none}
@@ -107,11 +106,11 @@ body::after{
 .err   {color:#ff4466}
 
 .input-row{
-  max-width:860px;margin:0 auto;
-  display:flex;align-items:center;gap:12px;
+  max-width:700px;margin:0 auto;
+  display:flex;align-items:center;gap:8px;
   border:1px solid rgba(0,255,231,0.18);
   border-radius:6px;
-  padding:4px 4px 4px 16px;
+  padding:3px 3px 3px 12px;
   background:rgba(0,255,231,0.03);
   backdrop-filter:blur(6px);
   transition:border-color .3s,box-shadow .3s;
@@ -188,16 +187,59 @@ body::after{
 }
 
 .statusbar{
-  max-width:860px;margin:6px auto 0;
+  max-width:700px;margin:4px auto 0;
   font-family:'Share Tech Mono',monospace;
   font-size:10px;letter-spacing:.18em;
   color:rgba(0,255,231,0.25);
   text-align:right;
 }
 
+/* ── Always-Listening Indicator ─────────────── */
+#listenIndicator{
+  position:fixed;
+  bottom:calc(clamp(40px,8vh,70px) + 80px);
+  left:50%;transform:translateX(-50%);
+  z-index:101;
+  display:flex;align-items:center;gap:8px;
+  padding:6px 16px;
+  background:rgba(3,8,15,0.7);
+  border:1px solid rgba(0,255,231,0.15);
+  border-radius:20px;
+  backdrop-filter:blur(6px);
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;letter-spacing:.15em;
+  color:rgba(0,255,231,0.4);
+  transition:all .3s;
+  pointer-events:none;
+}
+#listenIndicator.active{
+  border-color:rgba(0,255,231,0.5);
+  color:rgba(0,255,231,0.7);
+}
+#listenIndicator.heard{
+  border-color:rgba(255,220,0,0.5);
+  color:rgba(255,220,0,0.7);
+}
+#listenIndicator .pulse-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(0,255,231,0.5);
+  animation:listenPulse 2s ease-in-out infinite;
+}
+#listenIndicator.active .pulse-dot{
+  background:rgba(0,255,231,0.9);
+  animation:listenPulse 1s ease-in-out infinite;
+}
+#listenIndicator.heard .pulse-dot{
+  background:rgba(255,220,0,0.9);
+  animation:listenPulse 0.5s ease-in-out infinite;
+}
+@keyframes listenPulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.3;transform:scale(.7)}
+}
+
 .sim-panel{
-  position:fixed;right:18px;top:50%;transform:translateY(-50%);
-  z-index:200;
+  display:none !important;
   display:flex;flex-direction:column;gap:0;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
 }
@@ -309,8 +351,33 @@ body::after{
 }
 
 @media (max-width:600px){
-  .sim-panel{right:8px;top:auto;bottom:140px;transform:none}
-  .sim-btn{padding:7px 12px;font-size:10px}
+  .sim-panel{display:none !important}
+}
+
+/* ── Raspberry Pi screens (800x480, 1024x600) ── */
+@media (max-height:600px){
+  .topbar{padding:6px 14px}
+  .topbar .logo{font-size:11px;letter-spacing:.2em}
+  .chat{padding:0 10px 6px}
+  .log{height:30px;margin-bottom:4px}
+  .input-row{padding:2px 2px 2px 8px;gap:4px}
+  .input-row input{font-size:12px}
+  .send-btn{padding:6px 12px;font-size:9px}
+  .mic-btn,.voice-btn{padding:6px 8px;font-size:13px}
+  .statusbar{font-size:8px;margin-top:2px}
+  #listenIndicator{bottom:65px;padding:4px 10px;font-size:8px}
+  .entry{font-size:10px;line-height:1.5}
+}
+@media (max-width:480px){
+  .topbar{padding:6px 10px}
+  .topbar .logo{font-size:10px}
+  .chat{padding:0 6px 6px}
+  .log{height:28px}
+  .input-row{gap:4px;padding:2px 2px 2px 6px}
+  .send-btn{padding:5px 10px;font-size:8px;letter-spacing:.08em}
+  .mic-btn,.voice-btn{padding:5px 7px;font-size:12px}
+  .pfx{font-size:12px}
+  .entry{font-size:10px;line-height:1.4}
 }
 
 /* ── YouTube Now-Playing Banner ──────────────── */
@@ -536,12 +603,12 @@ body::after{
 <div class="scene">
   <canvas id="faceCanvas"></canvas>
   <div id="emoLabel">◈ NEUTRAL ◈</div>
-  <!-- YouTube Now-Playing Banner -->
   <!-- YouTube Overlay -->
-  <div id="ytOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
-    <button id="ytClose" style="position:absolute;top:24px;right:32px;font-size:2em;background:#fff;border:none;border-radius:50%;width:48px;height:48px;cursor:pointer;">&times;</button>
-    <iframe id="ytPlayer" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay" style="border-radius:16px;box-shadow:0 0 32px #000"></iframe>
+  <div id="ytOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+    <button id="ytClose" style="position:absolute;top:24px;right:32px;font-size:2em;background:#fff;border:none;border-radius:50%;width:48px;height:48px;cursor:pointer;z-index:10000;">&times;</button>
+    <div id="ytPlayerWrap" style="width:680px;max-width:90vw;aspect-ratio:16/9;border-radius:16px;overflow:hidden;box-shadow:0 0 32px #000;background:#000;"></div>
     <div id="ytTitle" style="margin-top:18px;color:#fff;font-size:1.3em;text-align:center"></div>
+    <div id="ytSkipMsg" style="margin-top:8px;color:#ff6;font-size:0.9em;text-align:center;display:none;"></div>
   </div>
   <!-- Smart Dashboard Overlay -->
   <div id="dashOverlay">
@@ -608,20 +675,25 @@ body::after{
   </div>
 </div>
 
+<div id="listenIndicator"><span class="pulse-dot"></span><span id="listenText">ALWAYS LISTENING</span></div>
+
 <div class="chat">
   <div class="log" id="log">
     <div class="entry bot">&gt; BOOT COMPLETE — CRIMSON v3.1 READY</div>
-    <div class="entry bot">&gt; Say hello or ask me anything...</div>
+    <div class="entry bot">&gt; Say "Crimson" to talk to me! I'm always listening...</div>
   </div>
   <div class="input-row">
     <span class="pfx">&gt;_</span>
     <input id="prompt" type="text" placeholder="Ask CRIMSON anything..." autocomplete="off"/>
     <button class="mic-btn" id="mic-btn" title="Click to speak">🎤</button>
-    <button class="voice-btn" id="voice-toggle" title="Toggle CRIMSON voice output">🔇</button>
+    <button class="voice-btn active" id="voice-toggle" title="CRIMSON voice ON (click to mute)">�</button>
     <button class="send-btn" id="send-btn">TRANSMIT</button>
   </div>
   <div class="statusbar" id="status">[ IDLE ]</div>
 </div>
+
+<!-- YouTube IFrame API (for proper error detection) -->
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 // ════════════════════════════════════════════════
@@ -693,10 +765,8 @@ const fc   = document.getElementById('faceCanvas')
 const fctx = fc.getContext('2d')
 let FW, FH
 function resizeFace(){
-  const r=fc.getBoundingClientRect()
-  if(r.width > 0 && r.height > 0){
-    FW=fc.width=r.width; FH=fc.height=r.height
-  }
+  FW=fc.width=window.innerWidth
+  FH=fc.height=window.innerHeight
 }
 resizeFace(); window.addEventListener('resize',resizeFace)
 
@@ -991,39 +1061,129 @@ function detectEmotion(t){
 }
 
 // ════════════════════════════════════════════════
-//  YOUTUBE PLAYER ENGINE (opens in new tab)
+//  YOUTUBE PLAYER ENGINE (IFrame API + Auto-Skip)
 // ════════════════════════════════════════════════
-var ytBanner = document.getElementById('ytBanner')
+var ytOverlay   = document.getElementById('ytOverlay');
+var ytPlayerWrap= document.getElementById('ytPlayerWrap');
+var ytTitle     = document.getElementById('ytTitle');
+var ytSkipMsg   = document.getElementById('ytSkipMsg');
+var ytClose     = document.getElementById('ytClose');
+var ytPlaying   = false;
+var ytAPIReady  = false;
+var ytPlayerObj = null;  // YouTube IFrame Player object
+var ytVideoList = [];    // list of video IDs to try
+var ytVideoIdx  = 0;     // current index in the list
+var ytCurrentQuery = ''; // current song query
 
-var ytOverlay = document.getElementById('ytOverlay');
-var ytPlayer = document.getElementById('ytPlayer');
-var ytTitle = document.getElementById('ytTitle');
-var ytClose = document.getElementById('ytClose');
-var ytPlaying = false;
+// Called automatically by YouTube IFrame API when ready
+function onYouTubeIframeAPIReady(){
+  ytAPIReady = true;
+  console.log('[CRIMSON] YouTube IFrame API ready');
+}
 
-function showYouTube(videoId, title){
+function _createPlayer(videoId){
+  // Destroy old player if exists
+  if(ytPlayerObj){ try{ ytPlayerObj.destroy(); }catch(e){} ytPlayerObj = null; }
+  // Clear the wrapper
+  ytPlayerWrap.innerHTML = '<div id="ytPlayerDiv"></div>';
+
+  ytPlayerObj = new YT.Player('ytPlayerDiv', {
+    width: '100%',
+    height: '100%',
+    videoId: videoId,
+    playerVars: {
+      autoplay: 1,
+      modestbranding: 1,
+      rel: 0,
+      fs: 1,
+      origin: window.location.origin
+    },
+    events: {
+      onReady: function(ev){
+        console.log('[CRIMSON] YT Player ready, playing:', videoId);
+        ev.target.playVideo();
+      },
+      onError: function(ev){
+        // Error codes: 2=bad param, 5=HTML5 error, 100=not found, 101/150=blocked embed
+        console.warn('[CRIMSON] YT embed error code:', ev.data, 'for', videoId);
+        _tryNextVideo();
+      },
+      onStateChange: function(ev){
+        // YT.PlayerState.ENDED === 0
+        if(ev.data === 0){
+          console.log('[CRIMSON] Video ended');
+          hideYouTube();
+        }
+      }
+    }
+  });
+}
+
+function _tryNextVideo(){
+  ytVideoIdx++;
+  if(ytVideoIdx < ytVideoList.length){
+    var nextId = ytVideoList[ytVideoIdx];
+    console.log('[CRIMSON] Skipping to next video (' + (ytVideoIdx+1) + '/' + ytVideoList.length + '):', nextId);
+    ytSkipMsg.style.display = 'block';
+    ytSkipMsg.textContent = 'Skipping blocked video... trying #' + (ytVideoIdx+1);
+    _createPlayer(nextId);
+  } else {
+    addMsg('err', '&gt; All video results were blocked from embedding. Try a different song!');
+    statusEl.textContent = '[ ALL VIDEOS BLOCKED ]';
+    setEmotion('sad', 3000);
+    setTimeout(function(){ hideYouTube(); }, 1500);
+  }
+}
+
+function showYouTube(videoIds, title){
   ytPlaying = true;
+  ytVideoList = videoIds;
+  ytVideoIdx = 0;
+  ytCurrentQuery = title || 'Now Playing';
   ytOverlay.style.display = 'flex';
-  ytPlayer.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
-  ytTitle.textContent = '\u266B ' + (title || 'Now Playing');
+  ytTitle.textContent = '\u266B ' + ytCurrentQuery;
+  ytSkipMsg.style.display = 'none';
+  ytSkipMsg.textContent = '';
   setEmotion('happy');
   statusEl.textContent = '[ \u266B NOW PLAYING ]';
-  addMsg('bot', '&gt; \u266B Playing: ' + (title || 'Now Playing'));
-  console.log('[CRIMSON] YouTube embedded:', videoId, ytTitle.textContent);
+  addMsg('bot', '&gt; \u266B Playing: ' + ytCurrentQuery);
+
+  if(ytAPIReady){
+    _createPlayer(videoIds[0]);
+  } else {
+    // API not loaded yet, wait for it
+    var waitCount = 0;
+    var waitInterval = setInterval(function(){
+      waitCount++;
+      if(ytAPIReady){
+        clearInterval(waitInterval);
+        _createPlayer(videoIds[0]);
+      } else if(waitCount > 30){
+        clearInterval(waitInterval);
+        addMsg('err', '&gt; YouTube API failed to load.');
+        hideYouTube();
+      }
+    }, 200);
+  }
+  console.log('[CRIMSON] YouTube showYouTube:', videoIds.length, 'candidates for', ytCurrentQuery);
 }
 
 function hideYouTube(){
   ytPlaying = false;
   ytOverlay.style.display = 'none';
-  ytPlayer.src = '';
+  ytSkipMsg.style.display = 'none';
+  if(ytPlayerObj){ try{ ytPlayerObj.destroy(); }catch(e){} ytPlayerObj = null; }
+  ytPlayerWrap.innerHTML = '';
   ytTitle.textContent = '';
+  ytVideoList = [];
+  ytVideoIdx = 0;
   setEmotion('neutral');
   statusEl.textContent = '[ IDLE ]';
   addMsg('bot', '&gt; \u25A0 Music stopped.');
   console.log('[CRIMSON] YouTube stopped');
 }
 
-// Check if AI reply contains a [PLAY:...] or [STOP] command
+ytClose.addEventListener('click', hideYouTube);
 
 function searchAndPlayYouTube(query){
   statusEl.textContent = '[ \uD83D\uDD0D SEARCHING YOUTUBE... ]';
@@ -1038,7 +1198,9 @@ function searchAndPlayYouTube(query){
         setEmotion('sad', 3000);
         return;
       }
-      showYouTube(data.videoId, query);
+      // Use videoIds array (multiple candidates) for auto-skip
+      var ids = data.videoIds || [data.videoId];
+      showYouTube(ids, query);
     })
     .catch(function(e){
       addMsg('err', '&gt; YouTube search error: ' + e.message);
@@ -1069,9 +1231,88 @@ function handleMediaCommands(reply){
 }
 
 // ════════════════════════════════════════════════
+//  ANIMAL SOUND ENGINE (Local MP3s) 🐾
+// ════════════════════════════════════════════════
+var animalEmojis = {
+  cat:'🐱', dog:'🐶', cow:'🐮', chicken:'🐔', duck:'🦆', pig:'🐷',
+  horse:'🐴', sheep:'🐑', lion:'🦁', elephant:'🐘', frog:'🐸', bird:'🐦',
+  wolf:'🐺', monkey:'🐵', owl:'🦉', rooster:'🐓', dolphin:'🐬', whale:'🐳',
+  snake:'🐍', bee:'🐝', crow:'🦅', goat:'🐐', donkey:'🫏', tiger:'🐯', bear:'🐻',
+};
+
+// All 25 animal sounds served locally as small MP3 clips
+var animalList = [
+  'cat','dog','cow','chicken','duck','pig','horse','sheep',
+  'lion','elephant','frog','bird','wolf','monkey','owl','rooster',
+  'dolphin','whale','snake','bee','crow','goat','donkey','tiger','bear'
+];
+var animalAudio = null;
+
+function playAnimalSound(animal){
+  animal = animal.toLowerCase().trim();
+  var emoji = animalEmojis[animal] || '🐾';
+
+  if(animalList.indexOf(animal) === -1){
+    addMsg('err', '&gt; No sound available for "' + animal + '"');
+    return;
+  }
+
+  var url = '/static/sounds/' + animal + '.mp3';
+
+  console.log('[CRIMSON] Playing animal sound:', animal, emoji);
+  setEmotion('happy');
+  statusEl.textContent = '[ ' + emoji + ' ' + animal.toUpperCase() + ' SOUND ]';
+  talking = true;
+
+  // Stop any previous animal audio
+  if(animalAudio){ animalAudio.pause(); animalAudio = null; }
+
+  animalAudio = new Audio(url);
+  animalAudio.volume = 0.85;
+
+  animalAudio.onended = function(){
+    talking = false;
+    setEmotion('neutral');
+    statusEl.textContent = '[ IDLE ]';
+    animalAudio = null;
+  };
+
+  animalAudio.onerror = function(e){
+    console.warn('[CRIMSON] Animal sound load error:', e);
+    addMsg('err', '&gt; Could not load ' + animal + ' sound');
+    talking = false;
+    setEmotion('sad', 3000);
+    statusEl.textContent = '[ SOUND ERROR ]';
+    animalAudio = null;
+  };
+
+  animalAudio.play().then(function(){
+    statusEl.textContent = '[ ' + emoji + ' ' + animal.toUpperCase() + ' SOUND ]';
+    addMsg('bot', '&gt; ' + emoji + ' Playing ' + animal + ' sound!');
+  }).catch(function(e){
+    console.warn('[CRIMSON] Audio play failed:', e);
+    talking = false;
+    setEmotion('neutral');
+    statusEl.textContent = '[ IDLE ]';
+  });
+}
+
+function handleAnimalCommands(reply){
+  var soundMatch = reply.match(/\[SOUND:([^\]]+)\]/);
+  if(soundMatch){
+    var animal = soundMatch[1].trim().toLowerCase();
+    var cleanReply = reply.replace(/\[SOUND:[^\]]+\]/, '').trim();
+    if(cleanReply) addMsg('bot', '&gt; CRIMSON: ' + cleanReply);
+    playAnimalSound(animal);
+    return true;
+  }
+  return false;
+}
+
+// ════════════════════════════════════════════════
 //  VOICE OUTPUT (Text-to-Speech)
 // ════════════════════════════════════════════════
-var voiceEnabled = false
+var voiceEnabled = true
 var currentUtterance = null
 var cachedVoices = []
 var voiceReady = false
@@ -1152,30 +1393,57 @@ function speakText(text){
     // Refresh voices if needed
     if(cachedVoices.length === 0) loadVoices()
 
+    // Prefer a child-like voice if available
     var preferred = cachedVoices.find(function(v){
-      return /google uk english male|daniel|male/i.test(v.name)
-    }) || cachedVoices.find(function(v){ return v.lang.startsWith('en') }) || cachedVoices[0]
+      return /child|kid|boy|girl|junior|teen/i.test(v.name)
+    }) || cachedVoices.find(function(v){
+      return /female|woman|girl/i.test(v.name) && v.lang.startsWith('en')
+    }) || cachedVoices.find(function(v){
+      return v.lang.startsWith('en')
+    }) || cachedVoices[0]
     if(preferred) utter.voice = preferred
 
-    utter.rate = 1.05
-    utter.pitch = 1.1
+    utter.rate = 1.08
+    utter.pitch = 1.45 // higher pitch for kid-like sound
     utter.volume = 1.0
 
     utter.onstart = function(){
-      console.log('[CRIMSON] TTS started')
+      console.log('[CRIMSON] TTS started (voice: ' + (utter.voice ? utter.voice.name : 'default') + ")")
       talking = true
+      // Pause mic while speaking to avoid hearing ourselves
+      if(recognition && alwaysListening){
+        try { recognition.stop() } catch(ex){}
+        console.log('[CRIMSON] Paused mic during TTS')
+      }
     }
     utter.onend = function(){
       console.log('[CRIMSON] TTS ended')
       talking = false
       currentUtterance = null
       if(speechResumeInterval){ clearInterval(speechResumeInterval); speechResumeInterval = null }
+      // Resume always-listening after speaking
+      if(alwaysListening){
+        setTimeout(function(){
+          try { recognition.start() } catch(ex){
+            setTimeout(startAlwaysListening, 500)
+          }
+          console.log('[CRIMSON] Resumed mic after TTS')
+        }, 400)
+      }
     }
     utter.onerror = function(e){
       console.warn('[CRIMSON] TTS error:', e.error)
       talking = false
       currentUtterance = null
       if(speechResumeInterval){ clearInterval(speechResumeInterval); speechResumeInterval = null }
+      // Resume always-listening after error
+      if(alwaysListening){
+        setTimeout(function(){
+          try { recognition.start() } catch(ex){
+            setTimeout(startAlwaysListening, 500)
+          }
+        }, 400)
+      }
     }
     utter.onboundary = function(e){ if(e.name === 'word') talkT += 0.5 }
 
@@ -1185,51 +1453,160 @@ function speakText(text){
 }
 
 // ════════════════════════════════════════════════
-//  VOICE INPUT (Speech-to-Text)
+//  VOICE INPUT (Always-Listening + Wake Word)
 // ════════════════════════════════════════════════
 var recognition = null
 var isRecording = false
+var alwaysListening = false
+var wakeWordActive = false   // true when "Crimson" detected, capturing command
+var wakeWordTimeout = null
+var listenIndicator = document.getElementById('listenIndicator')
+var listenText = document.getElementById('listenText')
 
 var SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition
 if(SpeechRecog){
-  console.log('[CRIMSON] SpeechRecognition API available')
+  console.log('[CRIMSON] SpeechRecognition API available — always-listen mode')
   recognition = new SpeechRecog()
-  recognition.continuous = false
+  recognition.continuous = true
   recognition.interimResults = true
   recognition.lang = 'en-US'
 
+  // ── Start always-listening ──
+  function startAlwaysListening(){
+    if(alwaysListening) return
+    alwaysListening = true
+    wakeWordActive = false
+    try {
+      recognition.start()
+      console.log('[CRIMSON] Always-listening started')
+    } catch(e){
+      console.warn('[CRIMSON] Mic start error:', e.message)
+      setTimeout(startAlwaysListening, 1000)
+    }
+  }
+
+  function restartListening(){
+    alwaysListening = false
+    wakeWordActive = false
+    if(wakeWordTimeout){ clearTimeout(wakeWordTimeout); wakeWordTimeout = null }
+    setTimeout(startAlwaysListening, 500)
+  }
+
   recognition.onstart = function(){
-    console.log('[CRIMSON] Mic recording started')
+    console.log('[CRIMSON] Mic listening...')
     isRecording = true
+    alwaysListening = true
     micBtn.classList.add('recording')
     micBtn.textContent = '\u23F9'
-    statusEl.textContent = '[ \uD83C\uDFA4 LISTENING... ]'
-    inputEl.placeholder = 'Listening...'
+    listenIndicator.className = 'active'
+    listenText.textContent = 'LISTENING...'
   }
 
   recognition.onresult = function(e){
-    var interim = '', final2 = ''
+    var interim = '', finalText = ''
     for(var i = e.resultIndex; i < e.results.length; i++){
       var transcript = e.results[i][0].transcript
-      if(e.results[i].isFinal) final2 += transcript
+      if(e.results[i].isFinal) finalText += transcript
       else interim += transcript
     }
-    inputEl.value = final2 || interim
-    console.log('[CRIMSON] Heard:', inputEl.value)
+
+    var heard = (finalText || interim).toLowerCase().trim()
+    console.log('[CRIMSON] Heard:', heard, '| wakeActive:', wakeWordActive)
+
+    // ── Check for wake word "crimson" / "hey crimson" ──
+    var wakePattern = /\b(hey\s+)?crimson\b/i
+    var activateMicPattern = /\b(activate|enable|turn on|start)\s+(the\s+)?mic(rophone)?\b/i
+
+    if(!wakeWordActive){
+      // Passive listening — looking for wake word
+      if(wakePattern.test(heard)){
+        console.log('[CRIMSON] 🔥 Wake word detected!')
+        wakeWordActive = true
+        listenIndicator.className = 'heard'
+        listenText.textContent = '✦ CRIMSON ACTIVATED'
+        setEmotion('happy', 2000)
+        statusEl.textContent = '[ 🎤 LISTENING FOR COMMAND... ]'
+
+        // Extract any text after the wake word
+        var afterWake = heard.replace(wakePattern, '').trim()
+
+        // If there's already a command after "crimson", process it
+        if(afterWake && finalText){
+          processVoiceCommand(afterWake)
+          return
+        }
+
+        // Set timeout — if no command in 8 seconds, go back to passive
+        if(wakeWordTimeout) clearTimeout(wakeWordTimeout)
+        wakeWordTimeout = setTimeout(function(){
+          if(wakeWordActive){
+            console.log('[CRIMSON] Wake word timeout — no command received')
+            wakeWordActive = false
+            listenIndicator.className = 'active'
+            listenText.textContent = 'LISTENING...'
+            statusEl.textContent = '[ IDLE ]'
+          }
+        }, 8000)
+      }
+      // ── Check for "activate the mic" voice command ──
+      else if(activateMicPattern.test(heard) && finalText){
+        console.log('[CRIMSON] Voice command: activate mic')
+        addMsg('bot', '&gt; 🎤 Mic activated! Say "Crimson" followed by your question.')
+        setEmotion('happy', 2000)
+        speakText('Mic activated! Just say Crimson to talk to me.')
+      }
+      // Show interim text faintly
+      if(interim){
+        inputEl.value = interim
+        inputEl.style.opacity = '0.3'
+      }
+    } else {
+      // Wake word was triggered — capturing command
+      var command = heard.replace(wakePattern, '').trim()
+      inputEl.value = command || interim
+      inputEl.style.opacity = '1'
+
+      if(finalText && command){
+        processVoiceCommand(command)
+      }
+    }
+  }
+
+  function processVoiceCommand(command){
+    console.log('[CRIMSON] Processing voice command:', command)
+    wakeWordActive = false
+    if(wakeWordTimeout){ clearTimeout(wakeWordTimeout); wakeWordTimeout = null }
+
+    inputEl.value = command
+    inputEl.style.opacity = '1'
+    listenIndicator.className = 'active'
+    listenText.textContent = 'LISTENING...'
+    statusEl.textContent = '[ VOICE CAPTURED ]'
+
+    // Stop TTS if speaking
+    if(currentUtterance){ speechSynthesis.cancel(); talking = false; currentUtterance = null }
+
+    setTimeout(function(){ send() }, 300)
   }
 
   recognition.onend = function(){
-    console.log('[CRIMSON] Mic recording ended')
+    console.log('[CRIMSON] Recognition ended')
     isRecording = false
     micBtn.classList.remove('recording')
     micBtn.textContent = '\uD83C\uDFA4'
-    inputEl.placeholder = 'Ask CRIMSON anything...'
-    var text = inputEl.value.trim()
-    if(text){
-      statusEl.textContent = '[ VOICE CAPTURED ]'
-      setTimeout(function(){ send() }, 400)
+
+    // Auto-restart for always-listening (unless manually stopped)
+    if(alwaysListening){
+      console.log('[CRIMSON] Auto-restarting listener...')
+      setTimeout(function(){
+        try { recognition.start() } catch(e){
+          console.warn('[CRIMSON] Restart error:', e.message)
+          setTimeout(startAlwaysListening, 1000)
+        }
+      }, 300)
     } else {
-      statusEl.textContent = '[ NO SPEECH DETECTED ]'
+      listenIndicator.className = ''
+      listenText.textContent = 'MIC OFF'
     }
   }
 
@@ -1238,44 +1615,61 @@ if(SpeechRecog){
     isRecording = false
     micBtn.classList.remove('recording')
     micBtn.textContent = '\uD83C\uDFA4'
-    inputEl.placeholder = 'Ask CRIMSON anything...'
+
     if(e.error === 'no-speech'){
-      statusEl.textContent = '[ NO SPEECH DETECTED ]'
+      // Normal — just keep listening
+      console.log('[CRIMSON] No speech detected, continuing...')
     } else if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
       addMsg('err','&gt; MIC ACCESS DENIED — allow mic in browser settings or use Chrome on localhost')
       statusEl.textContent = '[ MIC BLOCKED ]'
+      alwaysListening = false
+      listenIndicator.className = ''
+      listenText.textContent = 'MIC BLOCKED'
+      return
     } else if(e.error === 'network'){
       addMsg('err','&gt; MIC NETWORK ERROR — Chrome needs internet for speech recognition')
       statusEl.textContent = '[ MIC NETWORK ERROR ]'
     } else if(e.error === 'aborted'){
-      statusEl.textContent = '[ MIC STOPPED ]'
+      // Aborted — will auto-restart
     } else {
-      addMsg('err','&gt; MIC ERROR: '+e.error)
-      statusEl.textContent = '[ MIC ERROR: '+e.error+' ]'
+      console.warn('[CRIMSON] Mic error:', e.error)
+    }
+
+    // Auto-restart
+    if(alwaysListening){
+      setTimeout(function(){
+        try { recognition.start() } catch(ex){
+          setTimeout(startAlwaysListening, 1500)
+        }
+      }, 500)
     }
   }
 
+  // Mic button = manual toggle for always-listening
   micBtn.addEventListener('click', function(){
-    console.log('[CRIMSON] Mic button clicked, isRecording:', isRecording)
-    if(isRecording){
-      recognition.stop()
+    if(alwaysListening){
+      // Stop listening
+      alwaysListening = false
+      wakeWordActive = false
+      try { recognition.stop() } catch(e){}
+      listenIndicator.className = ''
+      listenText.textContent = 'MIC OFF'
+      statusEl.textContent = '[ MIC OFF ]'
+      addMsg('bot', '&gt; 🎤 Always-listening paused. Click mic or say "activate the mic" to resume.')
     } else {
-      // Stop any current speech output first
-      if(currentUtterance){ speechSynthesis.cancel(); talking = false; currentUtterance = null }
+      // Resume listening
       inputEl.value = ''
-      try {
-        recognition.start()
-      } catch(e) {
-        console.warn('[CRIMSON] Mic start error:', e.message)
-        // If already started, stop and restart
-        recognition.stop()
-        setTimeout(function(){
-          inputEl.value = ''
-          recognition.start()
-        }, 300)
-      }
+      startAlwaysListening()
+      addMsg('bot', '&gt; 🎤 Always-listening resumed! Say "Crimson" to talk to me.')
     }
   })
+
+  // Auto-start always-listening on page load (needs user gesture on some browsers)
+  // We attempt it immediately; if blocked, the mic button serves as the gesture
+  setTimeout(function(){
+    startAlwaysListening()
+  }, 2000)
+
 } else {
   console.warn('[CRIMSON] SpeechRecognition NOT available — use Chrome')
   micBtn.style.opacity = '0.3'
@@ -1322,6 +1716,7 @@ function send(){
   addMsg('you','&gt; '+text)
   setEmotion('thinking')
   talking=true
+  inputEl.style.opacity = '1'
   var te=addMsg('think','&gt; thinking...')
 
   var startTime = Date.now()
@@ -1357,6 +1752,10 @@ function send(){
       if(handleMediaCommands(j.reply)){
         addToMemory('crimson', j.reply)
         statusEl.textContent='[ OK \u00B7 '+backend+' \u00B7 '+elapsed+'s ]'
+      // Check for animal sound commands ([SOUND:...])
+      } else if(handleAnimalCommands(j.reply)){
+        addToMemory('crimson', j.reply)
+        // statusEl is set by playAnimalSound
       } else {
         addMsg('bot','&gt; CRIMSON: '+j.reply)
         addToMemory('crimson', j.reply)

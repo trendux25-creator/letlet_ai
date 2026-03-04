@@ -16,6 +16,8 @@ CORS(app)
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
 GROQ_MODEL   = os.environ.get('GROQ_MODEL', 'llama-3.1-8b-instant')
 GROQ_URL     = 'https://api.groq.com/openai/v1/chat/completions'
+# Runtime toggle: set to False if Groq authentication fails to avoid repeated 401s
+GROQ_ENABLED = True if GROQ_API_KEY else False
 
 OLLAMA_URL   = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma2:2b')
@@ -44,7 +46,19 @@ SYSTEM_PROMPT = (
     'ask them what song they want to hear.\n'
     'If the user says "stop", "stop the music", "stop playing", or similar, '
     'respond with exactly: [STOP]\n'
-    'You can add a short fun comment before or after the [PLAY:...] or [STOP] tag.'
+    'You can add a short fun comment before or after the [PLAY:...] or [STOP] tag.\n\n'
+    'ANIMAL SOUND COMMANDS:\n'
+    'When the user asks "what does a [animal] sound like?", "make a [animal] sound", '
+    '"sound of a [animal]", "can you do a [animal]?", or anything about animal sounds/noises, '
+    'you MUST respond with EXACTLY this format:\n'
+    '[SOUND:animal_name]\n'
+    'Use simple lowercase animal names like: cat, dog, cow, chicken, duck, pig, horse, sheep, '
+    'lion, elephant, frog, bird, wolf, monkey, owl, rooster, dolphin, whale, snake, bee, crow, '
+    'goat, donkey, tiger, bear.\n'
+    'For example: "What does a cat sound like?" → "Meow meow! 🐱 [SOUND:cat]"\n'
+    'For example: "Do a dog sound!" → "Woof woof! 🐶 [SOUND:dog]"\n'
+    'Always add a fun onomatopoeia and emoji BEFORE the [SOUND:...] tag. '
+    'Be playful and kid-friendly!'
 )
 
 
@@ -66,7 +80,7 @@ def _add_to_history(role, content):
 
 def _groq_available():
     """Check if Groq API key is configured."""
-    return bool(GROQ_API_KEY)
+    return bool(GROQ_API_KEY) and GROQ_ENABLED
 
 
 def _ollama_available():
@@ -80,23 +94,46 @@ def _ollama_available():
 
 def _chat_groq(prompt):
     """Send a chat completion to Groq with conversation history."""
-    resp = requests.post(
-        GROQ_URL,
-        headers={
-            'Authorization': f'Bearer {GROQ_API_KEY}',
-            'Content-Type': 'application/json',
-        },
-        json={
-            'model': GROQ_MODEL,
-            'messages': _build_messages(prompt),
-            'max_tokens': 200,
-            'temperature': 0.7,
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
-    data = resp.json()
-    return data['choices'][0]['message']['content'].strip()
+    try:
+        resp = requests.post(
+            GROQ_URL,
+            headers={
+                'Authorization': f'Bearer {GROQ_API_KEY}',
+                'Content-Type': 'application/json',
+            },
+            json={
+                'model': GROQ_MODEL,
+                'messages': _build_messages(prompt),
+                'max_tokens': 200,
+                'temperature': 0.7,
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data['choices'][0]['message']['content'].strip()
+    except requests.exceptions.HTTPError as he:
+        # If authentication fails, disable Groq for the rest of this run to
+        # avoid repeated 401 logs and fallback immediately to other backends.
+        status = None
+        try:
+            status = he.response.status_code
+        except Exception:
+            status = None
+
+        if status == 401 or status == 403:
+            # disable Groq for subsequent requests
+            global GROQ_ENABLED
+            GROQ_ENABLED = False
+            raise Exception(
+                'Groq authentication failed (401/403). Groq has been disabled for this session. '
+                'Check your GROQ_API_KEY in .env and restart the server.'
+            ) from he
+        # Re-raise other HTTP errors
+        raise
+    except Exception:
+        # Let the caller handle other exceptions
+        raise
 
 
 def _chat_ollama(prompt):
@@ -352,12 +389,16 @@ def youtube_search():
         return jsonify({'error': str(e)}), 500
 
 
+# ── (Animal sounds are now served directly from Google Sound Library CDN) ──
+
+
 if __name__ == '__main__':
     print('\n=== Crimson AI Backend ===')
     print(f'  Groq:    {"✓ " + GROQ_MODEL if _groq_available() else "✗ no API key"}')
     print(f'  Ollama:  {"✓ " + OLLAMA_MODEL if _ollama_available() else "✗ not reachable"}')
     print(f'  OpenAI:  {"✓ ready" if OPENAI_API_KEY else "✗ no API key"}')
     print(f'  Weather: {"✓ " + WEATHER_CITY if WEATHER_API_KEY else "✗ no API key (optional)"}')
+    print(f'  Sounds:  ✓ Google Sound Library (client-side)')
     print(f'  Memory:  ✓ last {MAX_HISTORY} messages')
     print('===========================\n')
     app.run(host='0.0.0.0', port=5000, debug=False)
